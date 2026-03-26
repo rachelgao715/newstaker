@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEWSTAKER — Product Report</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@300;400;600;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #faf7f2;
+            --text: #2d2a3e;
+            --orange: #b85c38;
+            --grid: #e8ddd0;
+            --muted: #6b6580;
+            --font-display: 'Archivo Black', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-mono: 'Space Mono', monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-body);
+            line-height: 1.7;
+            background-image:
+                linear-gradient(var(--grid) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        /* ── Navigation ── */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(250,247,242,0.92);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            height: 48px;
+        }
+        nav .nav-logo {
+            font-family: var(--font-display);
+            font-size: 18px;
+            color: var(--orange);
+            letter-spacing: -0.02em;
+        }
+        nav .nav-links {
+            display: flex;
+            gap: 24px;
+        }
+        nav .nav-links a {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--muted);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: color 0.2s;
+        }
+        nav .nav-links a:hover { color: var(--orange); }
+
+        /* ── Sections ── */
+        section {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 80px 40px 60px;
+        }
+
+        .hero {
+            max-width: 100%;
+            padding: 160px 40px 100px;
+            text-align: center;
+        }
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(48px, 8vw, 96px);
+            color: var(--orange);
+            line-height: 0.95;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            transform: scaleX(1.05);
+        }
+        .hero .subtitle {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--muted);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+        .hero .tagline {
+            font-size: 16px;
+            color: var(--text);
+            font-weight: 300;
+            max-width: 560px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+        }
+        .hero .version {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--bg);
+            background: var(--text);
+            padding: 4px 14px;
+            letter-spacing: 1px;
+        }
+
+        h2 {
+            font-family: var(--font-display);
+            font-size: 32px;
+            color: var(--text);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            line-height: 1.1;
+        }
+        h2 .accent { color: var(--orange); }
+
+        h3 {
+            font-family: var(--font-display);
+            font-size: 16px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            margin-top: 32px;
+            color: var(--text);
+        }
+
+        .section-label {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--orange);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed var(--grid);
+        }
+
+        p {
+            font-size: 15px;
+            color: var(--text);
+            margin-bottom: 16px;
+            font-weight: 300;
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px solid var(--text);
+            margin: 0;
+        }
+
+        /* ── GIF Demo Frames ── */
+        .demo-frame {
+            width: 100%;
+            border: 2px solid var(--text);
+            box-shadow: 6px 6px 0 rgba(45,42,62,0.1);
+            margin: 24px 0 12px;
+            background: #1a1a2e;
+            overflow: hidden;
+            position: relative;
+        }
+        .demo-frame img {
+            width: 100%;
+            display: block;
+        }
+        .demo-caption {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--muted);
+            letter-spacing: 0.5px;
+            margin-bottom: 32px;
+        }
+
+        /* ── Feature Grid ── */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 24px 0;
+        }
+        .feature-card {
+            border: 1px solid var(--text);
+            padding: 20px;
+            background: rgba(250,247,242,0.8);
+            box-shadow: 3px 3px 0 rgba(45,42,62,0.06);
+            transition: transform 0.15s;
+        }
+        .feature-card:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 5px 5px 0 rgba(45,42,62,0.1);
+        }
+        .feature-card.full-width {
+            grid-column: 1 / -1;
+        }
+        .feature-card .card-tag {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: var(--orange);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .feature-card .card-title {
+            font-family: var(--font-display);
+            font-size: 14px;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+        .feature-card .card-desc {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.5;
+            font-weight: 300;
+        }
+
+        /* ── Timeline ── */
+        .timeline {
+            position: relative;
+            padding-left: 32px;
+            margin: 24px 0;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            border-left: 1px dashed var(--text);
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 28px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -28px;
+            top: 6px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 2px solid var(--orange);
+            background: var(--bg);
+        }
+        .timeline-item .t-label {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--orange);
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+        .timeline-item .t-title {
+            font-family: var(--font-display);
+            font-size: 13px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .timeline-item .t-desc {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.5;
+            font-weight: 300;
+        }
+
+        /* ── Tech Stack Bar ── */
+        .tech-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 16px 0;
+        }
+        .tech-tag {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            padding: 4px 12px;
+            border: 1px solid var(--text);
+            color: var(--text);
+            letter-spacing: 0.5px;
+        }
+
+        /* ── Roadmap Table ── */
+        .roadmap-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 24px 0;
+            font-size: 13px;
+        }
+        .roadmap-table th,
+        .roadmap-table td {
+            border: 1px solid var(--text);
+            padding: 10px 14px;
+            text-align: left;
+        }
+        .roadmap-table th {
+            font-family: var(--font-display);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: var(--text);
+            color: var(--bg);
+        }
+        .roadmap-table td {
+            font-weight: 300;
+        }
+        .roadmap-table .priority-high {
+            color: var(--orange);
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 700;
+        }
+        .roadmap-table .priority-mid {
+            color: #4b5e52;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 700;
+        }
+        .roadmap-table .priority-low {
+            color: var(--muted);
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        /* ── Stat Blocks ── */
+        .stat-row {
+            display: flex;
+            gap: 16px;
+            margin: 24px 0;
+        }
+        .stat-block {
+            flex: 1;
+            border: 1px solid var(--text);
+            padding: 16px;
+            text-align: center;
+            background: rgba(250,247,242,0.8);
+        }
+        .stat-block .stat-num {
+            font-family: var(--font-display);
+            font-size: 36px;
+            color: var(--orange);
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+        .stat-block .stat-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: var(--muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* ── Callout Box ── */
+        .callout {
+            border: 2px solid var(--orange);
+            border-left-width: 4px;
+            padding: 20px 24px;
+            margin: 24px 0;
+            background: rgba(184,92,56,0.03);
+        }
+        .callout .callout-title {
+            font-family: var(--font-display);
+            font-size: 12px;
+            color: var(--orange);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .callout p {
+            margin-bottom: 0;
+            font-size: 14px;
+        }
+
+        /* ── Inline List ── */
+        .styled-list {
+            margin-bottom: 24px;
+            padding-left: 20px;
+            font-size: 14px;
+            color: var(--muted);
+            font-weight: 300;
+        }
+        .styled-list li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+        .styled-list li strong {
+            color: var(--text);
+        }
+
+        /* ── Footer ── */
+        footer {
+            text-align: center;
+            padding: 40px;
+            border-top: 1px solid var(--text);
+            margin-top: 40px;
+        }
+        footer .footer-logo {
+            font-family: var(--font-display);
+            font-size: 24px;
+            color: var(--orange);
+            margin-bottom: 8px;
+        }
+        footer p {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--muted);
+            letter-spacing: 1px;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 640px) {
+            section { padding: 60px 20px 40px; }
+            .hero { padding: 120px 20px 60px; }
+            .feature-grid { grid-template-columns: 1fr; }
+            .stat-row { flex-direction: column; }
+            nav { padding: 0 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <span class="nav-logo">NEWSTAKER</span>
+    <div class="nav-links">
+        <a href="#overview">概述</a>
+        <a href="#features">功能</a>
+        <a href="#use-cases">应用场景</a>
+        <a href="#development">开发历程</a>
+        <a href="#architecture">架构</a>
+        <a href="#roadmap">未来计划</a>
+        <a href="/index.html" style="font-size:10px; color:var(--muted); opacity:0.7; margin-left:4px; transition:opacity 0.2s, color 0.2s;" onmouseover="this.style.opacity='1';this.style.color='var(--orange)'" onmouseout="this.style.opacity='0.7';this.style.color='var(--muted)'">▶ 体验 Demo</a>
+    </div>
+</nav>
+
+<!-- ════════════════════════════════════════ HERO ════════════════════════════════════════ -->
+<div class="hero">
+    <h1>NEWSTAKER</h1>
+    <div class="subtitle">AI-Powered Global News Intelligence</div>
+    <div class="tagline">一个融合了搜索、AI 分析与金融预测的全球新闻智能平台。<br>用 Paper Brutalism 美学重新定义新闻阅读体验。</div>
+    <div style="font-family:var(--font-mono); font-size:11px; color:var(--muted); letter-spacing:2px; margin-bottom:30px;">MADE BY <span style="color:var(--orange); font-weight:700;">RUICONG GAO</span></div>
+    <div style="display:flex; gap:12px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:40px;">
+        <span class="version">PRODUCT REPORT // V1.0 // 2026.03</span>
+    </div>
+</div>
+
+<hr class="divider">
+
+<!-- ════════════════════════════════════════ OVERVIEW ════════════════════════════════════════ -->
+<section id="overview">
+    <div class="section-label">01 — 产品概述</div>
+    <h2>搜索 · 分析 · <span class="accent">对话</span></h2>
+    <p>
+        NEWSTAKER 是一款 AI 驱动的全球新闻智能平台。它不只是新闻聚合——而是提供<strong>搜索 → 浏览 → AI 深度分析 → 金融影响预测</strong>的完整闭环，让每一条新闻都成为可挖掘的数据节点。
+    </p>
+    <p>
+        产品拥有独特的 <strong>Paper Brutalism</strong> 视觉语言——米白底纹、深色线框、等宽字体、网格背景——在复古报纸质感与现代信息设计之间取得了精准平衡。中央的线框地球作为视觉锚点，赋予界面全球化的空间感知。
+    </p>
+
+    <div class="stat-row">
+        <div class="stat-block">
+            <div class="stat-num">AI</div>
+            <div class="stat-label">GPT-4o 驱动分析</div>
+        </div>
+        <div class="stat-block">
+            <div class="stat-num">2</div>
+            <div class="stat-label">双模式 (Demo / Live)</div>
+        </div>
+        <div class="stat-block">
+            <div class="stat-num">7</div>
+            <div class="stat-label">新闻分类体系</div>
+        </div>
+        <div class="stat-block">
+            <div class="stat-num">∞</div>
+            <div class="stat-label">多轮 AI 对话</div>
+        </div>
+    </div>
+
+    <div class="demo-frame">
+        <img src="img/report/01-globe-overview.png" alt="NEWSTAKER 主界面">
+    </div>
+    <div class="demo-caption">▲ 主界面：Paper Brutalism 风格设计。左侧金融指数面板，中央线框地球装饰，右侧全球热点新闻流，顶部搜索栏</div>
+</section>
+
+<hr class="divider">
+
+<!-- ════════════════════════════════════════ FEATURES ════════════════════════════════════════ -->
+<section id="features">
+    <div class="section-label">02 — 核心功能</div>
+    <h2><span class="accent">五大</span>核心能力</h2>
+
+    <div class="feature-grid">
+        <div class="feature-card">
+            <div class="card-tag">Search</div>
+            <div class="card-title">全球新闻搜索</div>
+            <div class="card-desc">支持自然语言关键词搜索，Cmd/Ctrl+K 快捷聚焦。搜索结果实时映射到侧栏新闻列表，每条新闻附带分类标签、情绪分析、来源媒体和时间戳。支持中英文双语。</div>
+        </div>
+        <div class="feature-card">
+            <div class="card-tag">Chat</div>
+            <div class="card-title">AI 新闻对话</div>
+            <div class="card-desc">长按新闻卡片进入 AI 对话模式。基于 GPT-4o 的多轮对话，可深入讨论新闻背景、影响分析、关联事件。对话面板居中滑入，支持无限轮追问。</div>
+        </div>
+        <div class="feature-card">
+            <div class="card-tag">Finance</div>
+            <div class="card-title">金融数据 + 影响预测</div>
+            <div class="card-desc">左侧面板实时显示 NASDAQ / XAU / S&P500 指数。点击新闻情绪标签触发 AI 分析：预测 3 只看涨 + 3 只看跌股票及理由，点击个股可进入深度分析对话。</div>
+        </div>
+        <div class="feature-card">
+            <div class="card-tag">Mode</div>
+            <div class="card-title">双模式引擎</div>
+            <div class="card-desc">默认 LLM 演示模式——AI 生成高度逼真的新闻数据。三击右上角状态灯切换到 newsdata.io 真实 API，获取实时新闻与原文链接。两种模式无缝切换。</div>
+        </div>
+        <div class="feature-card full-width">
+            <div class="card-tag">Design</div>
+            <div class="card-title">Paper Brutalism 视觉系统</div>
+            <div class="card-desc">完整的设计语言体系：米白网格底纹、深色线框边框、Archivo Black 标题字体、Space Mono 等宽数据字体、Inter 正文。7 大分类色彩编码（冲突红、政治蓝、经济绿、科技黄、健康紫、环境橙、社会灰）。所有交互面板遵循统一的视觉规范，中央线框地球作为全局视觉锚点，传递全球化信息感知。</div>
+        </div>
+    </div>
+
+    <!-- Search Demo + Finance -->
+    <h3>搜索 · 新闻浏览 · 金融影响预测</h3>
+    <p>输入关键词后，AI 或真实 API 返回全球相关新闻，右侧栏以时间线形式展示，每条新闻标注分类、情绪、来源和摘要。与此同时，点击新闻情绪标签即可触发 <strong>AI 金融影响预测</strong>——左侧面板实时展示 PREDICTED GAINERS（看涨）和 PREDICTED LOSERS（看跌），每只个股附带涨跌幅预估和 AI 分析理由，点击个股还可进入深度对话。</p>
+    <div class="demo-frame">
+        <img src="img/report/05-stock-impact.png" alt="Search Results & Stock Impact">
+    </div>
+    <div class="demo-caption">▲ 搜索 "AI chip technology" 后：右侧展示 TSMC、NVIDIA、Intel 等相关新闻；左侧 AI 自动预测受影响个股——PREDICTED GAINERS: TSM +5.4%、NVDA +2.8% / PREDICTED LOSERS: INTC -3.1% 等，每只股票附带分析理由</div>
+
+    <!-- Chat Demo -->
+    <h3>AI 对话分析</h3>
+    <p>长按任意新闻卡片约 0.6 秒，进入与 GPT-4o 的深度对话模式。可追问新闻背景、潜在影响、相关事件，AI 基于新闻上下文给出专业分析。</p>
+    <div class="demo-frame">
+        <img src="img/report/04-chat-mode.png" alt="AI Chat Mode">
+    </div>
+    <div class="demo-caption">▲ 对话模式：面板居中滑入，顶部显示新闻摘要和来源 URL，底部输入框支持多轮追问。AI 提供背景分析、影响评估、关联事件等深度回复</div>
+
+    <!-- Location Card Demo -->
+    <h3>位置卡片与附近探索</h3>
+    <p>点击地球上的事件标记，弹出位置卡片显示坐标、分类和情绪信息，可一键搜索附近新闻，从 3D 视图过渡到 Leaflet 2D 高精地图。</p>
+    <div class="demo-frame">
+        <img src="img/report/02-location-card.png" alt="Location Card">
+    </div>
+    <div class="demo-caption">▲ 位置卡片：展示事件地理信息、新闻分类与情绪标签，SEARCH NEARBY 按钮触发附近新闻探索</div>
+
+    <!-- 2D Map + Event Detail -->
+    <h3>2D 高精度地图 · 事件详情</h3>
+    <p>点击 SEARCH NEARBY 后，界面从 3D 地球平滑过渡到 Leaflet 2D 高精度地图。地图上以脉冲圆点标记附近事件，点击任意标记后，左侧展开<strong>事件地理信息面板</strong>（EVENT LOCATION：城市、坐标、分类、情绪），右侧展开<strong>新闻摘要面板</strong>（NEWS BRIEF：标题、摘要、来源、时间）。三栏布局将地理空间与新闻内容完美融合。</p>
+    <div class="demo-frame">
+        <img src="img/report/06-nearby-2d-map.png" alt="2D Nearby Map with Event Panels">
+    </div>
+    <div class="demo-caption">▲ 2D 高精度地图模式：左侧事件位置信息（坐标、分类 CONFLICT、情绪 NEGATIVE），中央 Leaflet 高精地图 + 事件标记，右侧新闻摘要（标题、来源 REUTERS、时间）</div>
+</section>
+
+<hr class="divider">
+
+<!-- ════════════════════════════════════════ USE CASES ════════════════════════════════════════ -->
+<section id="use-cases">
+    <div class="section-label">03 — 应用场景</div>
+    <h2>不止是<span class="accent">看新闻</span></h2>
+
+    <h3>场景一：真实模式 — 新闻浏览与深度分析</h3>
+    <p>
+        切换到 LIVE 模式后，NEWSTAKER 接入 newsdata.io 真实数据源。AI 对每条新闻自动补充分类、情绪分析和地理定位，成为一个具有深度分析能力的新闻工具：
+    </p>
+    <ul class="styled-list">
+        <li><strong>新闻记者和编辑</strong> — 追踪全球热点分布，搜索特定话题的国际报道，用 AI 对话快速梳理事件脉络</li>
+        <li><strong>投资分析师</strong> — 利用 AI 即时评估新闻对个股的潜在影响（看涨/看跌预测），辅助投资决策</li>
+        <li><strong>企业情报团队</strong> — 监控行业动态和全球区域风险，AI 对话深入分析供应链和市场影响</li>
+        <li><strong>教育与研究</strong> — 帮助学生和研究者以多维视角（分类、情绪、地理、金融影响）理解时事新闻</li>
+    </ul>
+
+    <div class="callout">
+        <div class="callout-title">真实模式的核心价值</div>
+        <p>将新闻从"平面阅读"升维到"搜索 + 情绪分析 + AI 对话 + 金融预测"的多维智能体验。每一条新闻不再是孤立的文本，而是一个有分类、有情绪、有市场关联的数据节点。</p>
+    </div>
+
+    <h3>场景二：LLM 模式 — 游戏 UI 与艺术创作</h3>
+    <p>
+        在 LLM 演示模式下，AI 可以根据任意主题即时生成全球新闻分布。这种"AI 按需生成内容 + 精致 UI 呈现"的能力，为以下场景打开了想象空间：
+    </p>
+    <ul class="styled-list">
+        <li><strong>开放世界游戏内置新闻终端</strong> — Paper Brutalism 的视觉风格天然契合赛博朋克 / 科幻 / 蒸汽朋克美学。AI 基于游戏世界观即时生成新闻流，作为沉浸式 UI 组件嵌入游戏</li>
+        <li><strong>交互式叙事与数据艺术</strong> — 艺术家用关键词驱动 AI 生成特定主题的全球事件可视化，作为数据装置或交互纪录片的展示媒介</li>
+        <li><strong>策略 / 模拟类游戏仪表盘</strong> — "新闻侧栏 + 金融面板 + 情报分析"的信息架构天然适配全球态势感知界面</li>
+        <li><strong>世界观构建工具</strong> — 科幻 / 奇幻创作者输入关键词，AI 即时生成虚构世界的完整新闻事件网络，辅助世界观设计</li>
+    </ul>
+
+    <div class="callout">
+        <div class="callout-title">设计哲学</div>
+        <p>Paper Brutalism 风格——米白背景、深色线框、等宽字体、网格底纹——既是复古的，也是未来的。这套视觉语言可以无缝嵌入从赛博朋克到蒸汽朋克的任意美学体系，作为下一代游戏和交互媒体的 UI 范式。</p>
+    </div>
+</section>
+
+<hr class="divider">
+
+<!-- ════════════════════════════════════════ DEVELOPMENT ════════════════════════════════════════ -->
+<section id="development">
+    <div class="section-label">04 — 开发历程</div>
+    <h2>从概念到<span class="accent">产品</span></h2>
+
+    <div class="timeline">
+        <div class="timeline-item">
+            <div class="t-label">PHASE 01 — 前端原型</div>
+            <div class="t-title">视觉系统与界面框架</div>
+            <div class="t-desc">使用 Variant 生成初始前端原型。确定 Paper Brutalism 设计语言（米白底纹 + 深色线框 + 等宽字体 + 网格背景），实现主界面三栏布局：左侧金融数据面板、中央线框地球装饰、右侧新闻列表。7 大新闻分类颜色体系。单 HTML 文件，纯前端 Mock 数据。</div>
+        </div>
+        <div class="timeline-item">
+            <div class="t-label">PHASE 02 — 后端集成</div>
+            <div class="t-title">Node.js 服务器 + GPT-4o API</div>
+            <div class="t-desc">构建 Node.js 后端（server.js），接入 GPT-4o 作为 AI 引擎。实现搜索、趋势、附近新闻三个 API 路由。LLM 负责生成新闻数据（含坐标、分类、情绪评分）以及新闻深度分析和股票影响预测。</div>
+        </div>
+        <div class="timeline-item">
+            <div class="t-label">PHASE 03 — 真实数据接入</div>
+            <div class="t-title">newsdata.io API + 双模式切换</div>
+            <div class="t-desc">
+                初始方案尝试 GDELT 开放数据（免费、无 API Key），但 Node.js http 模块调用时持续超时（curl 正常），多次调试后放弃。最终集成 newsdata.io API，实现三击状态灯切换 Demo/Live 双模式。真实新闻经 LLM 二次处理（补充坐标、分类、情绪），保留原始 URL。
+            </div>
+        </div>
+        <div class="timeline-item">
+            <div class="t-label">PHASE 04 — 交互深化</div>
+            <div class="t-title">AI 对话 + 股票分析 + 附近探索</div>
+            <div class="t-desc">
+                新增长按触发新闻 AI 对话（多轮追问）、情绪标签点击触发股票影响分析（3 涨 3 跌预测）、点击个股进入深度对话。实现 3D→2D 地图过渡的附近新闻探索。构建完整的"搜索 → 浏览 → 分析 → 对话"闭环。
+            </div>
+        </div>
+    </div>
+</section>
+
+<hr class="divider">
+
+<!-- ════════════════════════════════════════ ARCHITECTURE ════════════════════════════════════════ -->
+<section id="architecture">
+    <div class="section-label">05 — 技术架构</div>
+    <h2>轻量级<span class="accent">全栈</span>架构</h2>
+
+    <p>
+        NEWSTAKER 采用极简技术栈——单文件前端 + 轻量 Node.js 后端，无构建工具、无框架依赖、无数据库。追求"打开即用"的部署体验。
+    </p>
+
+    <h3>技术栈</h3>
+    <div class="tech-bar">
+        <span class="tech-tag">Node.js (http)</span>
+        <span class="tech-tag">GPT-4o API</span>
+        <span class="tech-tag">newsdata.io</span>
+        <span class="tech-tag">Vanilla JS</span>
+        <span class="tech-tag">Globe.gl v2.30</span>
+        <span class="tech-tag">Three.js</span>
+        <span class="tech-tag">Leaflet v1.9.4</span>
+        <span class="tech-tag">CSS Variables</span>
+    </div>
+
+    <h3>架构图</h3>
+    <div style="margin:24px 0; font-family:var(--font-mono); font-size:10px; letter-spacing:0.5px;">
+
+        <!-- BROWSER Layer -->
+        <div style="border:2px solid var(--text); padding:20px 20px 16px; position:relative; background:rgba(250,247,242,0.6);">
+            <div style="position:absolute; top:-10px; left:16px; background:var(--bg); padding:0 8px; font-family:var(--font-display); font-size:11px; letter-spacing:1px; color:var(--text);">BROWSER</div>
+            <div style="text-align:center; color:var(--muted); font-size:9px; margin-bottom:14px;">index.html — Single Page Application</div>
+
+            <div style="display:flex; gap:10px; justify-content:center;">
+                <div style="flex:1; max-width:180px; border:1.5px solid var(--text); padding:12px 10px; text-align:center; background:rgba(250,247,242,0.9); box-shadow:3px 3px 0 rgba(45,42,62,0.06);">
+                    <div style="font-family:var(--font-display); font-size:11px; margin-bottom:4px;">Finance Panel</div>
+                    <div style="color:var(--muted); font-size:9px; line-height:1.4;">NASDAQ · XAU · S&P<br>Stock Impact AI</div>
+                </div>
+                <div style="flex:1; max-width:180px; border:1.5px solid var(--text); padding:12px 10px; text-align:center; background:rgba(250,247,242,0.9); box-shadow:3px 3px 0 rgba(45,42,62,0.06);">
+                    <div style="font-family:var(--font-display); font-size:11px; margin-bottom:4px;">Globe · Map</div>
+                    <div style="color:var(--muted); font-size:9px; line-height:1.4;">Globe.gl + Three.js<br>Leaflet 2D Map</div>
+                </div>
+                <div style="flex:1; max-width:180px; border:1.5px solid var(--text); padding:12px 10px; text-align:center; background:rgba(250,247,242,0.9); box-shadow:3px 3px 0 rgba(45,42,62,0.06);">
+                    <div style="font-family:var(--font-display); font-size:11px; margin-bottom:4px;">Sidebar · Chat</div>
+                    <div style="color:var(--muted); font-size:9px; line-height:1.4;">News List · Search<br>AI Conversation</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Connection Arrow -->
+        <div style="text-align:center; padding:8px 0;">
+            <div style="display:inline-block; position:relative;">
+                <div style="width:2px; height:28px; background:var(--text); margin:0 auto;"></div>
+                <div style="font-size:9px; color:var(--orange); font-weight:700; letter-spacing:1px; margin-top:2px;">fetch( )</div>
+                <div style="width:2px; height:12px; background:var(--text); margin:0 auto;"></div>
+                <div style="width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:8px solid var(--text); margin:0 auto;"></div>
+            </div>
+        </div>
+
+        <!-- SERVER Layer -->
+        <div style="border:2px solid var(--text); padding:20px 20px 16px; position:relative; background:rgba(45,42,62,0.03);">
+            <div style="position:absolute; top:-10px; left:16px; background:var(--text); color:var(--bg); padding:2px 10px; font-family:var(--font-display); font-size:11px; letter-spacing:1px;">NODE.JS SERVER</div>
+            <div style="text-align:center; color:var(--muted); font-size:9px; margin-bottom:14px;">server.js — Port 8090</div>
+
+            <!-- API Router -->
+            <div style="border:1.5px solid var(--text); padding:14px 16px; margin-bottom:12px; background:rgba(250,247,242,0.7); box-shadow:3px 3px 0 rgba(45,42,62,0.06);">
+                <div style="font-family:var(--font-display); font-size:11px; margin-bottom:10px; padding-bottom:6px; border-bottom:1px dashed var(--grid);">API ROUTER</div>
+
+                <div style="display:flex; gap:16px;">
+                    <!-- Routes -->
+                    <div style="flex:1;">
+                        <div style="color:var(--text); font-size:9px; line-height:2;">
+                            <div><span style="color:var(--orange);">/api/news/trending</span> → getLLMNews( )</div>
+                            <div><span style="color:var(--orange);">/api/news/search</span>&nbsp;&nbsp; → getLLMNews( )</div>
+                            <div><span style="color:var(--orange);">/api/news/nearby</span>&nbsp;&nbsp; → getLLMNews( )</div>
+                            <div><span style="color:var(--orange);">/api/llm</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; → Proxy to LLM</div>
+                            <div style="margin-top:4px; padding-top:4px; border-top:1px dashed var(--grid);"><span style="color:#4b5e52;">?source=real</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; → getNewsdataNews( )</div>
+                        </div>
+                    </div>
+
+                    <!-- External APIs -->
+                    <div style="display:flex; flex-direction:column; gap:8px; justify-content:center;">
+                        <div style="border:1.5px solid var(--orange); padding:8px 14px; text-align:center; background:rgba(184,92,56,0.05); box-shadow:2px 2px 0 rgba(184,92,56,0.1);">
+                            <div style="font-family:var(--font-display); font-size:10px; color:var(--orange);">GPT-4o</div>
+                            <div style="font-size:8px; color:var(--muted);">OpenAI API</div>
+                        </div>
+                        <div style="border:1.5px solid #4b5e52; padding:8px 14px; text-align:center; background:rgba(75,94,82,0.05); box-shadow:2px 2px 0 rgba(75,94,82,0.1);">
+                            <div style="font-family:var(--font-display); font-size:10px; color:#4b5e52;">newsdata.io</div>
+                            <div style="font-size:8px; color:var(--muted);">Live News API</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Static Server -->
+            <div style="text-align:center; color:var(--muted); font-size:9px; letter-spacing:0.5px;">
+                STATIC FILE SERVER — index.html · img/ · globe.gl.min.js
+            </div>
+        </div>
+
+    </div>
+
+    <h3>数据流</h3>
+    <p>
+        <strong>Demo 模式：</strong> 搜索请求 → Node.js → GPT-4o 生成新闻 JSON（含坐标、分类、情绪）→ 前端渲染到侧栏 + 地球标记<br>
+        <strong>Live 模式：</strong> 搜索请求 → Node.js → newsdata.io 获取真实新闻 → GPT-4o 补充分类、情绪、坐标 → 前端渲染<br>
+        <strong>AI 对话：</strong> 用户提问 → Node.js 代理 → GPT-4o → 流式返回渲染<br>
+        <strong>股票分析：</strong> 情绪标签点击 → GPT-4o 预测 3 涨 3 跌个股 → 渲染到金融面板
+    </p>
+</section>
+
+<hr class="divider">
+
+<!-- ════════════════════════════════════════ ROADMAP ════════════════════════════════════════ -->
+<section id="roadmap">
+    <div class="section-label">06 — 未来改进与计划</div>
+    <h2>下一步<span class="accent">路线图</span></h2>
+
+    <table class="roadmap-table">
+        <thead>
+            <tr>
+                <th style="width:20%;">优先级</th>
+                <th style="width:30%;">功能</th>
+                <th>描述</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><span class="priority-high">■ HIGH</span></td>
+                <td>流式响应 (Streaming)</td>
+                <td>AI 对话和新闻生成改为 SSE 流式输出，消除等待空白，提升交互感知速度</td>
+            </tr>
+            <tr>
+                <td><span class="priority-high">■ HIGH</span></td>
+                <td>多数据源聚合</td>
+                <td>接入 GDELT、GNews、MediaStack 等多个新闻 API，交叉验证去重，提供更全面的全球覆盖</td>
+            </tr>
+            <tr>
+                <td><span class="priority-high">■ HIGH</span></td>
+                <td>真实金融数据</td>
+                <td>接入 Yahoo Finance / Alpha Vantage API，替换模拟数据为实时行情，增强金融分析的可信度</td>
+            </tr>
+            <tr>
+                <td><span class="priority-mid">■ MID</span></td>
+                <td>对话历史持久化</td>
+                <td>保存 AI 对话记录，支持历史对话回顾和继续追问</td>
+            </tr>
+            <tr>
+                <td><span class="priority-mid">■ MID</span></td>
+                <td>新闻分类过滤</td>
+                <td>添加 7 大分类过滤按钮，支持多选过滤新闻列表和地球标记</td>
+            </tr>
+            <tr>
+                <td><span class="priority-mid">■ MID</span></td>
+                <td>时间轴回放</td>
+                <td>添加时间维度滑块，回放过去 24h/7d/30d 的新闻事件演变，观察热点迁移</td>
+            </tr>
+            <tr>
+                <td><span class="priority-mid">■ MID</span></td>
+                <td>新闻关联网络</td>
+                <td>可视化相关新闻事件之间的因果 / 影响链，构建事件图谱</td>
+            </tr>
+            <tr>
+                <td><span class="priority-low">■ LOW</span></td>
+                <td>用户系统 + 收藏</td>
+                <td>登录后可收藏新闻、保存对话历史、自定义关注区域和分类</td>
+            </tr>
+            <tr>
+                <td><span class="priority-low">■ LOW</span></td>
+                <td>移动端适配</td>
+                <td>响应式布局 + 触摸优化，适配手机端浏览体验</td>
+            </tr>
+            <tr>
+                <td><span class="priority-low">■ LOW</span></td>
+                <td>游戏 SDK 封装</td>
+                <td>将 AI 新闻生成和 UI 组件封装为可嵌入的 SDK，供游戏开发者集成为内置新闻终端</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="callout">
+        <div class="callout-title">长期愿景</div>
+        <p>
+            NEWSTAKER 的目标不只是一个新闻产品，而是一个<strong>"AI 新闻智能引擎"</strong>——
+            既是记者的调查工具、分析师的决策助手，也可以是游戏世界中的沉浸式情报终端、数据艺术家的创作画布。
+            搜索是入口，AI 是大脑，新闻是脉搏。
+        </p>
+    </div>
+</section>
+
+<!-- ════════════════════════════════════════ FOOTER ════════════════════════════════════════ -->
+<footer>
+    <div class="footer-logo">NEWSTAKER</div>
+    <p>MADE BY RUICONG GAO</p>
+    <p style="margin-top:4px;">AI-POWERED GLOBAL NEWS INTELLIGENCE // PRODUCT REPORT V1.0 // MARCH 2026</p>
+</footer>
+
+</body>
+</html>

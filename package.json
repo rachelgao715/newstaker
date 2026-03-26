@@ -1,0 +1,12 @@
+{
+  "name": "newstaker",
+  "version": "1.0.0",
+  "description": "AI-Powered Global News Intelligence Platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

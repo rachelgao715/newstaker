@@ -1,0 +1,3066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEWSTAKER // GLOBAL DATA</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;600;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+    <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/globe.gl@2.30.0/dist/globe.gl.min.js"></script>
+
+    <!-- Leaflet for high-res 2D map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        :root {
+            --bg-paper: #faf7f2;
+            --brand-orange: #b85c38;
+            --grid-line: #e8ddd0;
+            --text-dark: #2d2a3e;
+
+            --cat-conflict: #b85c38;
+            --cat-politics: #4b5e52;
+            --cat-economy: #8c6a51;
+            --cat-tech: #6b7aa1;
+            --cat-health: #a38f7a;
+            --cat-env: #707d58;
+            --cat-society: #2d2a3e;
+
+            --font-display: 'Archivo Black', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-mono: 'Space Mono', monospace;
+
+            --border-standard: 1px solid var(--text-dark);
+            --grid-size: 40px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-paper);
+            color: var(--text-dark);
+            font-family: var(--font-body);
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            background-image:
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: var(--grid-size) var(--grid-size);
+            background-position: center center;
+        }
+
+        h1, h2, h3, h4, .display-text {
+            font-family: var(--font-display);
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+            line-height: 1;
+        }
+
+        .mono-text { font-family: var(--font-mono); }
+        .text-dark { color: var(--text-dark); }
+
+        /* ===== Globe ===== */
+        #globe-container {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1;
+        }
+
+        .panel {
+            position: absolute;
+            background: rgba(250, 247, 242, 0.95);
+            border: var(--border-standard);
+            z-index: 10;
+            box-shadow: 4px 4px 0px rgba(45, 42, 62, 0.08);
+        }
+
+        /* ===== Header ===== */
+        header {
+            top: var(--grid-size);
+            left: var(--grid-size);
+            right: var(--grid-size);
+            height: var(--grid-size);
+            display: flex;
+            align-items: stretch;
+            z-index: 20;
+            position: absolute;
+        }
+
+        .logo-box {
+            background: var(--bg-paper);
+            border: var(--border-standard);
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .logo-box h1 {
+            color: var(--brand-orange);
+            font-size: 42px;
+            transform: scaleX(1.1);
+            transform-origin: left center;
+            white-space: nowrap;
+        }
+
+        /* Search bar — centered between logo and controls */
+        .search-box {
+            display: flex;
+            align-items: center;
+            border: var(--border-standard);
+            background: var(--bg-paper);
+            padding: 0 14px;
+            width: 360px;
+            flex-shrink: 0;
+            margin: 0 auto;
+        }
+
+        .search-box input {
+            background: none;
+            border: none;
+            outline: none;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--text-dark);
+            width: 100%;
+            letter-spacing: 0.5px;
+        }
+        .search-box input::placeholder {
+            color: #b0a89e;
+        }
+        .search-box input:focus::placeholder {
+            color: transparent;
+        }
+
+        .search-submit {
+            background: var(--text-dark);
+            color: var(--bg-paper);
+            border: none;
+            font-family: var(--font-display);
+            font-size: 11px;
+            padding: 6px 14px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.1s;
+            letter-spacing: 0.5px;
+        }
+        .search-submit:hover { background: var(--brand-orange); }
+        .search-submit:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* Header right controls */
+        .header-controls {
+            display: flex;
+            margin-left: auto;
+            border: var(--border-standard);
+            background: var(--bg-paper);
+            flex-shrink: 0;
+        }
+
+        .header-btn {
+            border: none;
+            border-left: var(--border-standard);
+            background: transparent;
+            color: var(--text-dark);
+            font-family: var(--font-display);
+            padding: 0 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.1s;
+        }
+        .header-btn:first-child { border-left: none; }
+        .header-btn:hover {
+            background: var(--brand-orange);
+            color: var(--bg-paper);
+        }
+
+        /* Status indicator (compact) */
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0 12px;
+            border-left: var(--border-standard);
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: #5a7d5a;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        .status-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #5a7d5a;
+            animation: status-blink 2s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+        @keyframes status-blink {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(90,125,90,0.4); }
+            50% { opacity: 0.7; box-shadow: 0 0 4px 2px rgba(90,125,90,0.3); }
+        }
+
+        /* Language toggle button */
+        .lang-btn {
+            font-size: 12px !important;
+            letter-spacing: 0.5px;
+            border-left: var(--border-standard) !important;
+        }
+
+        /* ===== Loading indicator ===== */
+        .search-loading {
+            display: none;
+            position: absolute;
+            top: calc(var(--grid-size) * 2 + 10px);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 25;
+            background: var(--text-dark);
+            color: var(--bg-paper);
+            font-family: var(--font-mono);
+            font-size: 12px;
+            padding: 10px 24px;
+            letter-spacing: 2px;
+            border: var(--border-standard);
+        }
+        .search-loading.active { display: block; }
+
+        @keyframes pulse-loading {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .search-loading.active span {
+            animation: pulse-loading 1.5s ease-in-out infinite;
+        }
+
+        /* ===== Financial Panel ===== */
+        #financial-panel {
+            top: calc(var(--grid-size) * 3);
+            left: var(--grid-size);
+            width: calc(var(--grid-size) * 8);
+        }
+
+        .fin-header {
+            padding: 10px;
+            border-bottom: var(--border-standard);
+            font-family: var(--font-display);
+            font-size: 18px;
+            color: var(--brand-orange);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.15s;
+        }
+        .fin-header:hover {
+            background: rgba(184,92,56,0.04);
+        }
+        .fin-header .fin-toggle {
+            font-size: 12px;
+            transition: transform 0.3s;
+        }
+        .fin-header.collapsed .fin-toggle {
+            transform: rotate(-90deg);
+        }
+
+        #fin-data {
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.16,1,0.3,1), opacity 0.3s;
+            max-height: 500px;
+            opacity: 1;
+        }
+        #fin-data.collapsed {
+            max-height: 0;
+            opacity: 0;
+            border-bottom: none;
+        }
+
+        .fin-item {
+            padding: 10px;
+            border-bottom: var(--border-standard);
+        }
+        .fin-item:last-child { border-bottom: none; }
+
+        .fin-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 5px;
+        }
+
+        .fin-symbol { font-weight: 800; font-size: 14px; color: var(--text-dark); }
+        .fin-price { font-family: var(--font-mono); font-size: 16px; font-weight: 700; color: var(--text-dark); }
+
+        .fin-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .fin-change { font-family: var(--font-mono); font-size: 12px; }
+        .fin-change.up { color: #5a7d5a; }
+        .fin-change.down { color: var(--brand-orange); }
+
+        .sparkline {
+            width: 60px;
+            height: 20px;
+            opacity: 0.8;
+        }
+
+        .disclaimer {
+            padding: 5px;
+            font-size: 9px;
+            text-align: center;
+            border-top: var(--border-standard);
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+            color: var(--brand-orange);
+            opacity: 0.7;
+        }
+
+        /* ===== News Sidebar ===== */
+        #news-sidebar {
+            top: calc(var(--grid-size) * 3);
+            right: var(--grid-size);
+            bottom: var(--grid-size);
+            width: calc(var(--grid-size) * 10);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-paper);
+        }
+
+        /* Chat mode: centered on screen */
+        #news-sidebar.chat-mode {
+            top: calc(var(--grid-size) * 3);
+            bottom: var(--grid-size);
+            right: 50%;
+            transform: translateX(50%);
+            width: min(600px, calc(100vw - var(--grid-size) * 4));
+        }
+
+        .sidebar-close {
+            position: absolute;
+            top: 0; left: -40px;
+            width: 40px; height: 40px;
+            background: var(--bg-paper);
+            border: var(--border-standard);
+            border-right: none;
+            cursor: pointer;
+            display: none;
+            align-items: center; justify-content: center;
+            font-family: var(--font-display);
+            font-size: 20px;
+            color: var(--text-dark);
+        }
+        #news-sidebar.chat-mode .sidebar-close { display: flex; }
+        .sidebar-close:hover { background: var(--brand-orange); color: var(--bg-paper); }
+
+        .sidebar-header {
+            padding: 12px 16px;
+            border-bottom: var(--border-standard);
+            font-family: var(--font-display);
+            font-size: 14px;
+            color: var(--brand-orange);
+            background: var(--text-dark);
+            color: var(--bg-paper);
+        }
+
+        .news-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+        }
+
+        .news-content::-webkit-scrollbar { display: none; }
+        .news-content { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .news-card {
+            padding: 14px 16px;
+            border-bottom: var(--border-standard);
+            cursor: pointer;
+            transition: background 0.1s;
+            position: relative;
+            overflow: hidden;
+        }
+        .news-card:hover { background: rgba(184, 92, 56, 0.05); }
+
+        .news-meta {
+            display: flex;
+            justify-content: space-between;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            margin-bottom: 8px;
+            border-bottom: 1px dashed var(--text-dark);
+            padding-bottom: 5px;
+            color: var(--brand-orange);
+        }
+
+        .news-title {
+            font-family: var(--font-display);
+            font-size: 14px;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+            line-height: 1.2;
+        }
+        .news-card:hover .news-title { color: var(--brand-orange); }
+
+        .news-summary {
+            font-size: 12px;
+            line-height: 1.5;
+            color: #6b6580;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .news-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: #6b6580;
+        }
+
+        .sentiment-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border: 1px solid currentColor;
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+        }
+        .sentiment-POSITIVE { color: #5a7d5a; }
+        .sentiment-NEGATIVE { color: var(--brand-orange); }
+        .sentiment-NEUTRAL { color: #6b6580; }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            margin-top: 10px;
+            color: var(--text-dark);
+        }
+        .data-table th, .data-table td {
+            border: var(--border-standard);
+            padding: 6px 8px;
+            text-align: left;
+        }
+        .data-table th { width: 35%; background: rgba(45, 42, 62, 0.05); }
+
+        /* ===== Chat View (news detail + conversation) ===== */
+        .chat-view {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .chat-back-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            border: none;
+            border-bottom: var(--border-standard);
+            background: transparent;
+            color: var(--brand-orange);
+            font-family: var(--font-display);
+            font-size: 11px;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+            transition: background 0.1s;
+        }
+        .chat-back-btn:hover { background: rgba(184, 92, 56, 0.06); }
+
+        .chat-news-brief {
+            padding: 12px 16px;
+            border-bottom: var(--border-standard);
+            background: rgba(45, 42, 62, 0.03);
+        }
+        .chat-news-brief .news-title {
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+        .chat-news-brief .news-summary {
+            font-size: 11px;
+            -webkit-line-clamp: 2;
+            color: #6b6580;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .chat-messages::-webkit-scrollbar { display: none; }
+        .chat-messages { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .chat-msg {
+            max-width: 88%;
+            padding: 10px 14px;
+            font-size: 12px;
+            line-height: 1.6;
+            border: var(--border-standard);
+            word-wrap: break-word;
+        }
+
+        .chat-msg.user {
+            align-self: flex-end;
+            background: var(--text-dark);
+            color: var(--bg-paper);
+            border-color: var(--text-dark);
+        }
+
+        .chat-msg.assistant {
+            align-self: flex-start;
+            background: var(--bg-paper);
+            color: var(--text-dark);
+        }
+
+        .chat-msg.assistant .msg-label,
+        .chat-msg.user .msg-label {
+            font-family: var(--font-display);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+            opacity: 0.6;
+        }
+
+        .chat-msg.typing .dots::after {
+            content: '...';
+            animation: typing-dots 1.2s steps(4, end) infinite;
+        }
+        @keyframes typing-dots {
+            0% { content: ''; }
+            25% { content: '.'; }
+            50% { content: '..'; }
+            75% { content: '...'; }
+        }
+
+        .chat-input-bar {
+            display: flex;
+            align-items: center;
+            border-top: var(--border-standard);
+            padding: 0;
+            background: var(--bg-paper);
+            flex-shrink: 0;
+        }
+
+        .chat-input-bar input {
+            flex: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-dark);
+            padding: 12px 14px;
+        }
+        .chat-input-bar input::placeholder { color: #b0a89e; }
+
+        .chat-send-btn {
+            background: var(--text-dark);
+            color: var(--bg-paper);
+            border: none;
+            border-left: var(--border-standard);
+            font-family: var(--font-display);
+            font-size: 10px;
+            padding: 12px 16px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.1s;
+            letter-spacing: 0.5px;
+        }
+        .chat-send-btn:hover { background: var(--brand-orange); }
+        .chat-send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* ===== Tooltip ===== */
+        .tooltip {
+            position: absolute;
+            background: var(--text-dark);
+            color: var(--bg-paper);
+            border: 1px solid var(--grid-line);
+            padding: 5px 10px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            pointer-events: none;
+            display: none;
+            z-index: 100;
+            white-space: nowrap;
+        }
+
+        /* ===== Location Info Card (on click) ===== */
+        .loc-card {
+            position: fixed;
+            z-index: 60;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(8px) scale(0.96);
+            transition: opacity 0.35s cubic-bezier(0.16,1,0.3,1), transform 0.35s cubic-bezier(0.16,1,0.3,1);
+            /* Positioned left-center of the globe area, avoids right sidebar */
+            left: calc(var(--grid-size) * 9 + 20px);
+            top: 50%;
+            transform: translateY(calc(-50% + 8px)) scale(0.96);
+        }
+        .loc-card.visible {
+            opacity: 1;
+            transform: translateY(-50%) scale(1);
+            pointer-events: auto;
+        }
+        .loc-card-inner {
+            background: var(--bg-paper);
+            border: var(--border-standard);
+            box-shadow: 6px 6px 0px rgba(45,42,62,0.1);
+            padding: 0;
+            min-width: 200px;
+        }
+        .loc-card-header {
+            background: var(--text-dark);
+            color: var(--bg-paper);
+            font-family: var(--font-display);
+            font-size: 11px;
+            padding: 7px 14px;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .loc-card-header .loc-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            animation: loc-dot-pulse 2s ease-in-out infinite;
+        }
+        @keyframes loc-dot-pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 currentColor; }
+            50% { opacity: 0.7; box-shadow: 0 0 6px 2px currentColor; }
+        }
+        .loc-card-body {
+            padding: 10px 14px;
+        }
+        .loc-card-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-dark);
+            padding: 3px 0;
+            border-bottom: 1px dashed var(--grid-line);
+        }
+        .loc-card-row:last-child { border-bottom: none; }
+        .loc-card-row .label { color: #b0a89e; text-transform: uppercase; letter-spacing: 0.5px; }
+        .loc-card-row .value { font-weight: 700; }
+        .loc-card-hint {
+            padding: 0;
+            border-top: var(--border-standard);
+        }
+        .loc-card-hint button {
+            display: block;
+            width: 100%;
+            padding: 7px 14px;
+            background: var(--text-dark);
+            color: var(--bg-paper);
+            border: none;
+            font-family: var(--font-display);
+            font-size: 9px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .loc-card-hint button:hover {
+            background: var(--brand-orange);
+        }
+        .loc-card-hint button:active {
+            transform: scale(0.97);
+        }
+
+        /* ===== Sentiment badge clickable in news card ===== */
+        .sentiment-badge.clickable {
+            cursor: pointer;
+            transition: all 0.15s;
+            position: relative;
+        }
+        .sentiment-badge.clickable:hover {
+            background: var(--brand-orange);
+            color: var(--bg-paper) !important;
+            border-color: var(--brand-orange);
+            transform: scale(1.08);
+        }
+        .sentiment-badge.clickable:active {
+            transform: scale(0.95);
+        }
+
+        /* ===== Stock Impact section in financial panel ===== */
+        .fin-impact-header {
+            padding: 8px 10px;
+            border-top: 2px solid var(--brand-orange);
+            border-bottom: var(--border-standard);
+            font-family: var(--font-display);
+            font-size: 11px;
+            color: var(--brand-orange);
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .fin-impact-header .impact-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--brand-orange);
+            animation: loc-dot-pulse 1.5s ease-in-out infinite;
+        }
+        .fin-impact-item {
+            padding: 8px 10px;
+            border-bottom: var(--border-standard);
+            animation: fadeSlideIn 0.3s ease-out both;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .fin-impact-item:hover {
+            background: rgba(184,92,56,0.06);
+        }
+        .fin-impact-item:nth-child(2) { animation-delay: 0.05s; }
+        .fin-impact-item:nth-child(3) { animation-delay: 0.1s; }
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .impact-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 3px;
+        }
+        .impact-ticker {
+            font-family: var(--font-display);
+            font-size: 13px;
+            color: var(--text-dark);
+        }
+        .impact-direction {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .impact-direction.up { color: #5a7d5a; }
+        .impact-direction.down { color: var(--brand-orange); }
+        .impact-reason {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: #6b6580;
+            line-height: 1.4;
+            margin-top: 2px;
+        }
+        .impact-loading {
+            padding: 14px 10px;
+            text-align: center;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--brand-orange);
+            letter-spacing: 1px;
+        }
+        .impact-loading span {
+            animation: pulse-loading 1.5s ease-in-out infinite;
+        }
+
+        /* Long-press progress bar inside news card */
+        .news-card .long-press-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            width: 0;
+            background: var(--brand-orange);
+            pointer-events: none;
+            border-radius: 0 2px 2px 0;
+        }
+        .news-card .long-press-bar.active {
+            transition: width 0.6s linear;
+            width: 100%;
+        }
+
+        /* ===== Empty state ===== */
+        .empty-state {
+            text-align: center;
+            padding: 60px 30px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: #b0a89e;
+            letter-spacing: 1px;
+        }
+
+        /* ===== Error toast ===== */
+        .error-toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--brand-orange);
+            color: var(--bg-paper);
+            font-family: var(--font-mono);
+            font-size: 11px;
+            padding: 10px 24px;
+            border: var(--border-standard);
+            z-index: 50;
+            display: none;
+            max-width: 500px;
+            text-align: center;
+        }
+        .error-toast.show { display: block; }
+
+        /* ===== Nearby Mode Indicator ===== */
+        .nearby-mode-bar {
+            position: fixed;
+            bottom: calc(var(--grid-size) + 8px);
+            left: 50%;
+            transform: translateX(-50%) translateY(60px);
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--bg-paper);
+            border: var(--border-standard);
+            padding: 8px 12px 8px 16px;
+            box-shadow: 4px 4px 0px rgba(45,42,62,0.08);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.16,1,0.3,1);
+            pointer-events: none;
+        }
+        .nearby-mode-bar.active {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+            pointer-events: auto;
+        }
+        .nearby-mode-bar .nearby-label {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-dark);
+            letter-spacing: 1px;
+        }
+        .nearby-mode-bar .nearby-location {
+            font-family: var(--font-display);
+            font-size: 12px;
+            color: var(--brand-orange);
+        }
+        .nearby-mode-bar button {
+            background: var(--text-dark);
+            color: var(--bg-paper);
+            border: none;
+            font-family: var(--font-display);
+            font-size: 10px;
+            padding: 6px 14px;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            transition: background 0.15s;
+        }
+        .nearby-mode-bar button:hover {
+            background: var(--brand-orange);
+        }
+
+        /* ===== 2D Flat Map Overlay (Leaflet) ===== */
+        #flat-map-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 12;
+            opacity: 0;
+            transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1);
+            pointer-events: none;
+            /* Paper background covers the globe behind */
+            background: var(--bg-paper);
+            background-image:
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: var(--grid-size) var(--grid-size);
+            background-position: center center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+        }
+        #flat-map-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* ── Three-column layout container ── */
+        #flat-map-layout {
+            display: flex;
+            align-items: stretch;
+            justify-content: center;
+            gap: 14px;
+            max-height: 520px;
+        }
+
+        /* ── Left panel: geo info ── */
+        #nearby-panel-left {
+            width: 180px;
+            min-width: 160px;
+            background: var(--bg-paper);
+            border: 2px solid var(--text-dark);
+            box-shadow: 4px 4px 0px rgba(45,42,62,0.10);
+            padding: 16px 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            opacity: 0;
+            transform: translateX(12px);
+            transition: opacity 0.35s ease, transform 0.35s ease;
+            pointer-events: none;
+        }
+        #nearby-panel-left.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+        .np-section-label {
+            font-family: var(--font-display);
+            font-size: 9px;
+            letter-spacing: 1.5px;
+            color: #b0a89e;
+            margin-bottom: 6px;
+        }
+        .np-location {
+            font-family: var(--font-display);
+            font-size: 14px;
+            color: var(--text-dark);
+            line-height: 1.3;
+            margin-bottom: 14px;
+            word-break: break-word;
+        }
+        .np-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 6px;
+        }
+        .np-row .np-key {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: #b0a89e;
+            letter-spacing: 0.5px;
+        }
+        .np-row .np-val {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-dark);
+        }
+        .np-cat-dot {
+            display: inline-block;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+
+        /* ── Right panel: news summary ── */
+        #nearby-panel-right {
+            width: 220px;
+            min-width: 200px;
+            background: var(--bg-paper);
+            border: 2px solid var(--text-dark);
+            box-shadow: 4px 4px 0px rgba(45,42,62,0.10);
+            padding: 16px 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            opacity: 0;
+            transform: translateX(-12px);
+            transition: opacity 0.35s ease, transform 0.35s ease;
+            pointer-events: none;
+        }
+        #nearby-panel-right.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+        .np-news-title {
+            font-family: var(--font-display);
+            font-size: 13px;
+            color: var(--text-dark);
+            line-height: 1.35;
+            margin-bottom: 10px;
+        }
+        .np-news-summary {
+            font-family: var(--font-body);
+            font-size: 11px;
+            color: #6b6580;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+        .np-news-source {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: #b0a89e;
+            letter-spacing: 0.5px;
+        }
+        .np-news-time {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: #b0a89e;
+            margin-top: 4px;
+        }
+
+        /* Map wrapper: a bounded panel, center column */
+        #flat-map-wrapper {
+            position: relative;
+            width: calc(100vw - var(--grid-size) * 8);
+            height: calc(100vh - var(--grid-size) * 10);
+            max-width: 520px;
+            max-height: 520px;
+            border: 2px solid var(--text-dark);
+            box-shadow: 6px 6px 0px rgba(45,42,62,0.12);
+            background: var(--bg-paper);
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        /* Leaflet mount point — fills the wrapper */
+        #flat-map-container {
+            width: 100%;
+            height: 100%;
+            /* Match paper background so no grey flash before tiles load */
+            background: var(--bg-paper);
+        }
+        /* Override Leaflet's default grey container background */
+        #flat-map-container .leaflet-container {
+            background: var(--bg-paper) !important;
+        }
+        /* Sepia/paper tone filter on map tiles to match design */
+        #flat-map-container .leaflet-tile-pane {
+            filter: sepia(0.25) saturate(0.6) brightness(1.05) contrast(1.05);
+        }
+        /* Hide leaflet default attribution clutter */
+        #flat-map-container .leaflet-control-attribution {
+            display: none;
+        }
+        /* Style leaflet zoom controls (placed at top-right) */
+        #flat-map-container .leaflet-control-zoom {
+            border: var(--border-standard) !important;
+            box-shadow: 3px 3px 0px rgba(45,42,62,0.08) !important;
+            margin-top: 10px !important;
+            margin-right: 10px !important;
+        }
+        #flat-map-container .leaflet-control-zoom a {
+            background: var(--bg-paper) !important;
+            color: var(--text-dark) !important;
+            font-family: var(--font-display) !important;
+            border-color: var(--text-dark) !important;
+            width: 32px !important;
+            height: 32px !important;
+            line-height: 32px !important;
+        }
+        #flat-map-container .leaflet-control-zoom a:hover {
+            background: var(--brand-orange) !important;
+            color: var(--bg-paper) !important;
+        }
+        /* Title label above the map panel */
+        .flat-map-title {
+            position: absolute;
+            top: -32px;
+            left: 0;
+            background: var(--text-dark);
+            color: var(--bg-paper);
+            font-family: var(--font-display);
+            font-size: 12px;
+            padding: 6px 16px;
+            letter-spacing: 1px;
+            z-index: 1001;
+            white-space: nowrap;
+        }
+        /* Coordinates label at top-right of map panel */
+        .flat-map-coords-label {
+            position: absolute;
+            top: -28px;
+            right: 0;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: #b0a89e;
+            letter-spacing: 0.5px;
+            z-index: 1001;
+        }
+        /* Custom marker styling */
+        .flat-map-marker {
+            border: none !important;
+            background: none !important;
+        }
+        .flat-map-dot {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .flat-map-dot-inner {
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            border: 2px solid #faf7f2;
+            box-shadow: 0 0 0 1px currentColor, 0 2px 6px rgba(0,0,0,0.15);
+        }
+        .flat-map-dot-pulse {
+            position: absolute;
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            border: 1px solid currentColor;
+            opacity: 0.4;
+            animation: flat-dot-pulse 2s ease-out infinite;
+        }
+        @keyframes flat-dot-pulse {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+        .flat-map-popup .leaflet-popup-content-wrapper {
+            background: var(--bg-paper) !important;
+            border: var(--border-standard) !important;
+            border-radius: 0 !important;
+            box-shadow: 4px 4px 0px rgba(45,42,62,0.1) !important;
+            padding: 0 !important;
+        }
+        .flat-map-popup .leaflet-popup-tip {
+            background: var(--bg-paper) !important;
+            border: 1px solid var(--text-dark) !important;
+            box-shadow: none !important;
+        }
+        .flat-map-popup .leaflet-popup-content {
+            margin: 0 !important;
+            font-family: var(--font-body);
+        }
+        .fmp-header {
+            background: var(--text-dark);
+            color: var(--bg-paper);
+            font-family: var(--font-display);
+            font-size: 10px;
+            padding: 6px 12px;
+            letter-spacing: 0.5px;
+        }
+        .fmp-body {
+            padding: 8px 12px;
+        }
+        .fmp-title {
+            font-family: var(--font-display);
+            font-size: 12px;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+        .fmp-summary {
+            font-size: 11px;
+            color: #6b6580;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .fmp-meta {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: #b0a89e;
+            margin-top: 4px;
+        }
+        /* Info overlay on the map — bottom-left to avoid zoom controls */
+        .flat-map-info {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: rgba(250, 247, 242, 0.94);
+            border: var(--border-standard);
+            box-shadow: 3px 3px 0px rgba(45,42,62,0.08);
+            padding: 8px 12px;
+            pointer-events: none;
+        }
+        .flat-map-info h3 {
+            font-family: var(--font-display);
+            font-size: 12px;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+        .flat-map-info .info-detail {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: var(--brand-orange);
+            letter-spacing: 0.5px;
+        }
+        .flat-map-info .info-coords {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: #b0a89e;
+            margin-top: 2px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- ══════ API KEY GATE ══════ -->
+    <div id="api-key-gate" style="
+        position:fixed; top:0; left:0; right:0; bottom:0; z-index:9999;
+        background:var(--bg-paper);
+        background-image:
+            linear-gradient(var(--grid-line) 1px, transparent 1px),
+            linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+        background-size:40px 40px;
+        display:flex; align-items:center; justify-content:center;
+        transition: opacity 0.6s ease, visibility 0.6s ease;
+    ">
+        <div style="text-align:center; max-width:480px; padding:40px;">
+            <div style="font-family:var(--font-display); font-size:clamp(36px,6vw,56px); color:var(--brand-orange); line-height:0.95; margin-bottom:12px; text-transform:uppercase;">NEWSTAKER</div>
+            <div style="font-family:var(--font-mono); font-size:10px; color:#6b6580; letter-spacing:3px; margin-bottom:40px;">AI-POWERED GLOBAL NEWS INTELLIGENCE</div>
+
+            <div style="border:2px solid var(--text-dark); padding:28px 24px; background:rgba(250,247,242,0.9); box-shadow:6px 6px 0 rgba(45,42,62,0.08); text-align:left;">
+                <div style="font-family:var(--font-display); font-size:13px; text-transform:uppercase; margin-bottom:4px;">Enter API Key</div>
+                <div style="font-family:var(--font-mono); font-size:9px; color:#6b6580; letter-spacing:0.5px; margin-bottom:16px; line-height:1.5;">
+                    This demo requires an OpenAI-compatible API key.<br>
+                    <span style="color:var(--brand-orange);">Supports any OpenAI-compatible endpoint.</span>
+                </div>
+
+                <div style="display:flex; gap:8px; margin-bottom:12px;">
+                    <input id="gate-key-input" type="password" placeholder="sk-xxxxxxxxxxxxxxxx" spellcheck="false" autocomplete="off" style="
+                        flex:1; font-family:var(--font-mono); font-size:12px;
+                        padding:10px 14px; border:1.5px solid var(--text-dark);
+                        background:var(--bg-paper); color:var(--text-dark);
+                        outline:none; letter-spacing:0.5px;
+                    ">
+                    <button id="gate-verify-btn" onclick="verifyApiKey()" style="
+                        font-family:var(--font-display); font-size:11px;
+                        padding:10px 20px; border:2px solid var(--text-dark);
+                        background:var(--text-dark); color:var(--bg-paper);
+                        cursor:pointer; letter-spacing:1px; white-space:nowrap;
+                        transition:background 0.15s;
+                    ">VERIFY</button>
+                </div>
+
+                <div id="gate-status" style="font-family:var(--font-mono); font-size:10px; min-height:18px; letter-spacing:0.5px; line-height:1.5;"></div>
+            </div>
+
+            <div style="font-family:var(--font-mono); font-size:9px; color:#b0a89e; margin-top:20px; letter-spacing:0.5px; line-height:1.6;">
+                Your key is stored in sessionStorage only — never sent to any<br>third party. It is used solely to authenticate with the LLM endpoint.
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ── API Key Management ──
+    let _userApiKey = sessionStorage.getItem('newstaker_api_key') || '';
+
+    function getApiHeaders() {
+        return { 'X-API-Key': _userApiKey };
+    }
+
+    // Skip gate if key already verified in this session
+    if (_userApiKey) {
+        document.getElementById('api-key-gate').style.display = 'none';
+    }
+
+    async function verifyApiKey() {
+        const input = document.getElementById('gate-key-input');
+        const status = document.getElementById('gate-status');
+        const btn = document.getElementById('gate-verify-btn');
+        const key = input.value.trim();
+
+        if (!key) {
+            status.innerHTML = '<span style="color:#b85c38;">✕ Please enter an API key.</span>';
+            return;
+        }
+
+        btn.textContent = 'VERIFYING...';
+        btn.style.pointerEvents = 'none';
+        status.innerHTML = '<span style="color:#6b6580;">⟳ Verifying key against endpoint...</span>';
+
+        try {
+            const res = await fetch('/api/verify', {
+                method: 'POST',
+                headers: { 'X-API-Key': key }
+            });
+            const data = await res.json();
+
+            if (data.ok) {
+                status.innerHTML = '<span style="color:#4b5e52;">✓ Key verified! Entering NEWSTAKER...</span>';
+                _userApiKey = key;
+                sessionStorage.setItem('newstaker_api_key', key);
+
+                // Fade out gate
+                const gate = document.getElementById('api-key-gate');
+                gate.style.opacity = '0';
+                gate.style.visibility = 'hidden';
+                setTimeout(() => { gate.style.display = 'none'; }, 600);
+
+                // Trigger initial data load
+                if (typeof loadTrendingNews === 'function') loadTrendingNews();
+            } else {
+                status.innerHTML = `<span style="color:#b85c38;">✕ ${data.message || 'Verification failed.'}</span>`;
+            }
+        } catch (err) {
+            status.innerHTML = `<span style="color:#b85c38;">✕ Network error: ${err.message}</span>`;
+        }
+
+        btn.textContent = 'VERIFY';
+        btn.style.pointerEvents = 'auto';
+    }
+
+    // Enter key to submit
+    document.getElementById('gate-key-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') verifyApiKey();
+    });
+    </script>
+
+    <header>
+        <div class="logo-box">
+            <h1>NEWSTAKER</h1>
+        </div>
+        <div class="search-box">
+            <input type="text" id="search-input" placeholder="SEARCH: ENTER A TOPIC, EVENT, OR REGION...">
+            <button class="search-submit" id="search-btn" onclick="doSearch()">SEARCH</button>
+        </div>
+        <div class="header-controls">
+            <button class="header-btn" onclick="app.resetView()">[ RESET VIEW ]</button>
+            <span class="status-indicator" id="status-ok-btn" title="System Status: OK" style="cursor:pointer;"><span class="status-dot"></span>OK</span>
+            <button class="header-btn lang-btn" id="lang-btn" onclick="toggleLanguage()">EN / 中</button>
+        </div>
+    </header>
+
+    <div id="globe-container"></div>
+
+    <div class="search-loading" id="search-loading">
+        <span>QUERYING GLOBAL DATA MESH ...</span>
+    </div>
+
+    <div id="financial-panel" class="panel">
+        <div class="fin-header" id="fin-header" onclick="toggleMarketIndices()">
+            <span>MARKET INDICES</span>
+            <span class="fin-toggle">▼</span>
+        </div>
+        <div id="fin-data"></div>
+        <div class="disclaimer">DEMO DATA ONLY // NOT FINANCIAL ADVICE</div>
+    </div>
+
+    <aside id="news-sidebar" class="panel">
+        <div class="sidebar-close" onclick="app.closeSidebar()">×</div>
+        <div class="sidebar-header" id="sidebar-title">GLOBAL TRENDING</div>
+        <div class="news-content" id="news-list">
+            <div class="empty-state">LOADING GLOBAL HOTSPOTS...</div>
+        </div>
+    </aside>
+
+    <div id="tooltip" class="tooltip"></div>
+    <div class="error-toast" id="error-toast"></div>
+
+    <!-- 2D Flat Map Overlay (Leaflet) -->
+    <div id="flat-map-overlay">
+        <div id="flat-map-layout">
+            <!-- Left panel: geo info (hidden until marker clicked) -->
+            <div id="nearby-panel-left">
+                <div class="np-section-label">EVENT LOCATION</div>
+                <div class="np-location" id="np-location">—</div>
+                <div class="np-row"><span class="np-key">LAT</span><span class="np-val" id="np-lat">—</span></div>
+                <div class="np-row"><span class="np-key">LNG</span><span class="np-val" id="np-lng">—</span></div>
+                <div style="height:10px;"></div>
+                <div class="np-section-label">CLASSIFICATION</div>
+                <div class="np-row"><span class="np-key">CAT</span><span class="np-val" id="np-cat"><span class="np-cat-dot" id="np-cat-dot"></span>—</span></div>
+                <div class="np-row"><span class="np-key">MOOD</span><span class="np-val" id="np-senti">—</span></div>
+            </div>
+
+            <!-- Center: the map -->
+            <div id="flat-map-wrapper">
+                <div class="flat-map-title" id="flat-map-title">NEARBY REGION</div>
+                <div class="flat-map-coords-label" id="flat-map-coords-label">—</div>
+                <div id="flat-map-container">
+                    <div id="flat-map-loading" style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:#faf7f2;z-index:999;font-family:var(--font-mono);font-size:11px;color:#b0a89e;letter-spacing:2px;">LOADING MAP…</div>
+                </div>
+                <div class="flat-map-info" id="flat-map-info">
+                    <h3>NEARBY REGION VIEW</h3>
+                    <div class="info-detail" id="flat-map-info-detail">—</div>
+                    <div class="info-coords" id="flat-map-info-coords">—</div>
+                </div>
+            </div>
+
+            <!-- Right panel: news summary (hidden until marker clicked) -->
+            <div id="nearby-panel-right">
+                <div class="np-section-label">NEWS BRIEF</div>
+                <div class="np-news-title" id="np-title">—</div>
+                <div class="np-news-summary" id="np-summary">Click a marker on the map to see details.</div>
+                <div class="np-news-source" id="np-source"></div>
+                <div class="np-news-time" id="np-time"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nearby Mode Indicator Bar -->
+    <div class="nearby-mode-bar" id="nearby-mode-bar">
+        <span class="nearby-label">NEARBY:</span>
+        <span class="nearby-location" id="nearby-location-label">—</span>
+        <button onclick="exitNearbyMode()">← BACK TO GLOBE</button>
+    </div>
+
+    <!-- Location info card (appears on single click) -->
+    <div class="loc-card" id="loc-card">
+        <div class="loc-card-inner">
+            <div class="loc-card-header">
+                <span class="loc-dot" id="loc-dot"></span>
+                <span>EVENT LOCATION</span>
+            </div>
+            <div class="loc-card-body">
+                <div class="loc-card-row"><span class="label">LOCATION</span><span class="value" id="loc-location">—</span></div>
+                <div class="loc-card-row"><span class="label">LAT</span><span class="value" id="loc-lat">—</span></div>
+                <div class="loc-card-row"><span class="label">LNG</span><span class="value" id="loc-lng">—</span></div>
+                <div class="loc-card-row"><span class="label">CATEGORY</span><span class="value" id="loc-cat">—</span></div>
+                <div class="loc-card-row"><span class="label">SENTIMENT</span><span class="value" id="loc-senti">—</span></div>
+            </div>
+            <div class="loc-card-hint">
+                <button id="loc-nearby-btn" onclick="searchNearbyNews()">SEARCH NEARBY NEWS ▸</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ================================================================
+    // CONFIG
+    // ================================================================
+    const LLM_BASE = '';  // Use local proxy to avoid CORS
+    const LLM_KEY = '';   // Key handled by server proxy
+    const LLM_MODEL = 'gpt-4o';
+
+    // ── NEWS MODE: LLM demo (default) vs real API (triple-click OK) ──
+    let useRealAPI = false; // false = LLM-generated news, true = newsdata.io real news
+    let okClickCount = 0;
+    let okClickTimer = null;
+
+    // ================================================================
+    // CATEGORIES
+    // ================================================================
+    const categories = [
+        { id: 'conflict', name: 'CONFLICT', color: '#b85c38' },
+        { id: 'politics', name: 'POLITICS', color: '#4b5e52' },
+        { id: 'economy', name: 'ECONOMY', color: '#8c6a51' },
+        { id: 'tech', name: 'TECHNOLOGY', color: '#6b7aa1' },
+        { id: 'health', name: 'HEALTH', color: '#a38f7a' },
+        { id: 'env', name: 'ENVIRONMENT', color: '#707d58' },
+        { id: 'society', name: 'SOCIETY', color: '#2d2a3e' }
+    ];
+
+    let activeCategories = new Set(categories.map(c => c.id));
+    let newsData = []; // will be populated by search
+
+    // ── Helper: build newsData array from raw results ──
+    function buildNewsData(results) {
+        const catColorMap = {};
+        categories.forEach(c => { catColorMap[c.id] = c.color; });
+        return results.map((item, i) => ({
+            id: `NWS-${String(i).padStart(3, '0')}`,
+            title: item.title || 'Untitled',
+            summary: item.summary || '',
+            category: item.category || 'society',
+            catName: (categories.find(c => c.id === item.category) || { name: 'SOCIETY' }).name,
+            color: catColorMap[item.category] || '#2d2a3e',
+            lat: parseFloat(item.lat) || 0,
+            lng: parseFloat(item.lng) || 0,
+            location: item.location || '',
+            source: item.source || '',
+            sourceCount: item.source ? item.source.split(',').length : 1,
+            intensity: parseFloat(item.intensity) || 0.5,
+            sentiment: item.sentiment || 'NEUTRAL',
+            time: item.time || '',
+            url: item.url || ''
+        }));
+    }
+
+    // ── Helper: render news card HTML for sidebar ──
+    function renderNewsCardHTML(news, i) {
+        return `
+            <div class="news-card"
+                 onclick="onNewsCardClick(${i})"
+                 onmousedown="onNewsCardDown(${i}, event)"
+                 onmouseup="onNewsCardUp()"
+                 onmouseleave="onNewsCardLeave()"
+                 ontouchstart="onNewsCardDown(${i}, event)"
+                 ontouchend="onNewsCardUp()"
+                 ontouchcancel="onNewsCardUp()">
+                <div class="news-meta">
+                    <span>${(news.catName || news.category || '').toUpperCase()}</span>
+                    <span>${news.time || ''}</span>
+                </div>
+                <div class="news-title">${news.title}</div>
+                <div class="news-summary">${news.summary}</div>
+                <div class="news-footer">
+                    <span>${news.source || news.location || ''}</span>
+                    <span class="sentiment-badge clickable sentiment-${(news.sentiment || 'NEUTRAL').toUpperCase()}" onclick="event.stopPropagation(); analyzeStockImpact(${i})" title="Click to analyze stock impact">${(news.sentiment || 'NEUTRAL').toUpperCase()} ▸</span>
+                </div>
+            </div>`;
+    }
+
+    // ── Helper: parse LLM JSON response (with markdown handling) ──
+    function parseLLMJson(content) {
+        try {
+            return JSON.parse(content);
+        } catch {
+            const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
+            if (jsonMatch) return JSON.parse(jsonMatch[1].trim());
+            const objMatch = content.match(/\{[\s\S]*\}/);
+            if (objMatch) return JSON.parse(objMatch[0]);
+            throw new Error('Could not parse LLM response');
+        }
+    }
+
+    // ================================================================
+    // FINANCE PANEL (from your original design)
+    // ================================================================
+    const indices = [
+        { sym: 'IXIC', name: 'NASDAQ', price: 15345.2, base: 15000 },
+        { sym: 'XAU', name: 'GOLD', price: 2045.8, base: 2000 },
+        { sym: 'GSPC', name: 'S&P500', price: 4780.5, base: 4700 }
+    ];
+
+    function renderFinance() {
+        const container = document.getElementById('fin-data');
+        container.innerHTML = indices.map(idx => {
+            idx.price += (Math.random() - 0.5) * 10;
+            const change = idx.price - idx.base;
+            const pct = (change / idx.base) * 100;
+            const cls = change >= 0 ? 'up' : 'down';
+            const sign = change >= 0 ? '+' : '';
+            return `
+            <div class="fin-item">
+                <div class="fin-top">
+                    <span class="fin-symbol">${idx.sym}</span>
+                    <span class="fin-price">${idx.price.toFixed(2)}</span>
+                </div>
+                <div class="fin-bottom">
+                    <span class="fin-change ${cls}">${sign}${change.toFixed(2)} (${sign}${pct.toFixed(2)}%)</span>
+                    <svg class="sparkline" viewBox="0 0 60 20">
+                        <path d="M0,${10 + Math.random()*10} L10,${Math.random()*20} L20,${Math.random()*20} L30,${Math.random()*20} L40,${Math.random()*20} L50,${Math.random()*20} L60,${change > 0 ? 5 : 15}"
+                              fill="none" stroke="currentColor" stroke-width="1.5" class="fin-change ${cls}"></path>
+                    </svg>
+                </div>
+            </div>`;
+        }).join('');
+    }
+    renderFinance();
+    setInterval(renderFinance, 3000);
+
+    // ================================================================
+    // GLOBE (from your original design — hollow wireframe style)
+    // ================================================================
+    const app = {
+        globe: null,
+        tooltip: document.getElementById('tooltip'),
+        isInteracting: false,
+        idleTimer: null,
+        currentHoverPoint: null,
+
+        init() {
+            this.initGlobe();
+            this.bindEvents();
+        },
+
+        initGlobe() {
+            const container = document.getElementById('globe-container');
+            const colorPaper = '#faf7f2';
+            const colorLines = '#2d2a3e';
+
+            this.globe = Globe()(container)
+                .backgroundColor(colorPaper)
+                .showGlobe(true)
+                .showAtmosphere(false)
+                .globeMaterial(new THREE.MeshBasicMaterial({ color: colorPaper }))
+                .polygonCapColor(() => colorPaper)
+                .polygonSideColor(() => 'rgba(45, 42, 62, 0.05)')
+                .polygonStrokeColor(() => colorLines)
+                .polygonAltitude(0.01);
+
+            // Load country polygons for wireframe globe
+            fetch('https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson')
+                .then(r => r.json())
+                .then(data => {
+                    this.globe.polygonsData(data.features);
+                })
+                .catch(() => {
+                    this.globe.globeImageUrl('./img/earth-blue-marble.jpg');
+                });
+
+            // Empty markers initially
+            this.globe.customLayerData([])
+                .customThreeObject(d => {
+                    const catHex = {
+                        conflict: '#b85c38', politics: '#4b5e52', economy: '#8c6a51',
+                        tech: '#6b7aa1', health: '#a38f7a', env: '#707d58', society: '#2d2a3e'
+                    };
+                    const hex = catHex[d.category] || '#b85c38';
+                    const color = new THREE.Color(hex);
+                    const intensity = d.intensity || 0.5;
+
+                    const group = new THREE.Group();
+                    group.userData.newsId = d.id;
+
+                    // Simple solid dot — clean and readable
+                    const dotSize = 0.12 + intensity * 0.08;
+                    const dotGeo = new THREE.CircleGeometry(dotSize, 24);
+                    const dotMat = new THREE.MeshBasicMaterial({
+                        color: color, side: THREE.DoubleSide, transparent: true, opacity: 0.9
+                    });
+                    const dot = new THREE.Mesh(dotGeo, dotMat);
+                    dot.rotation.x = -Math.PI / 2;
+                    group.add(dot);
+
+                    return group;
+                })
+                .customThreeObjectUpdate((obj, d) => {
+                    Object.assign(obj.position, this.globe.getCoords(d.lat, d.lng, 0.012));
+                });
+
+            this.globe.onCustomLayerClick(this.handlePointClick.bind(this))
+                      .onCustomLayerHover(this.handlePointHover.bind(this));
+
+            const controls = this.globe.controls();
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.5;
+            this.globe.pointOfView({ lat: 35.86, lng: 104.19, altitude: 2.5 }, 2000);
+
+            controls.addEventListener('start', () => {
+                this.isInteracting = true;
+                controls.autoRotate = false;
+                clearTimeout(this.idleTimer);
+            });
+
+            controls.addEventListener('end', () => {
+                this.isInteracting = false;
+                this.idleTimer = setTimeout(() => {
+                    controls.autoRotate = true;
+                }, 5000);
+            });
+
+
+        },
+
+        updateGlobeData() {
+            const filtered = newsData.filter(d => activeCategories.has(d.category));
+            this.globe.customLayerData(filtered);
+        },
+
+        // Highlight a specific point on the globe by scaling it up
+        highlightedPointId: null,
+
+        highlightGlobePoint(newsId) {
+            this.highlightedPointId = newsId;
+            this.globe.scene().traverse(obj => {
+                if (obj.userData && obj.userData.newsId !== undefined) {
+                    const isTarget = obj.userData.newsId === newsId;
+                    const targetScale = isTarget ? 2.2 : 1;
+                    const doScale = () => {
+                        const s = obj.scale.x + (targetScale - obj.scale.x) * 0.3;
+                        obj.scale.set(s, s, s);
+                        if (Math.abs(s - targetScale) > 0.01) requestAnimationFrame(doScale);
+                    };
+                    doScale();
+                }
+            });
+        },
+
+        resetGlobeHighlight() {
+            this.highlightedPointId = null;
+            this.globe.scene().traverse(obj => {
+                if (obj.userData && obj.userData.newsId !== undefined) {
+                    const doScale = () => {
+                        const s = obj.scale.x + (1 - obj.scale.x) * 0.3;
+                        obj.scale.set(s, s, s);
+                        if (Math.abs(s - 1) > 0.01) requestAnimationFrame(doScale);
+                    };
+                    doScale();
+                }
+            });
+        },
+
+        handlePointHover(point, prevPoint) {
+            if (point) {
+                this.tooltip.style.display = 'block';
+                this.tooltip.innerText = `[${point.id}] ${(point.location || '').toUpperCase()}`;
+                this.currentHoverPoint = point;
+            } else {
+                this.tooltip.style.display = 'none';
+                this.currentHoverPoint = null;
+            }
+            document.getElementById('globe-container').style.cursor = point ? 'crosshair' : 'default';
+        },
+
+        handlePointClick(point) {
+            // Single click: fly to point and show location card
+            if (!point) return;
+            const idx = newsData.findIndex(d => d.id === point.id);
+            if (idx >= 0) {
+                showLocationCard(idx);
+            } else {
+                this.globe.pointOfView({ lat: point.lat, lng: point.lng, altitude: 0.8 }, 1000);
+                const controls = this.globe.controls();
+                controls.autoRotate = false;
+                clearTimeout(this.idleTimer);
+            }
+        },
+
+        closeSidebar() {
+            const sidebar = document.getElementById('news-sidebar');
+            sidebar.classList.remove('chat-mode');
+            // Cancel any ongoing chat
+            if (chatAbort) { chatAbort.abort(); chatAbort = null; }
+            // Restore to trending list
+            if (lastResultsHTML) {
+                document.getElementById('sidebar-title').textContent = lastSearchQuery
+                    ? `RESULTS: "${lastSearchQuery.toUpperCase()}"`
+                    : 'GLOBAL TRENDING';
+                document.getElementById('news-list').innerHTML = lastResultsHTML;
+            }
+        },
+
+        resetView() {
+            exitNearbyMode();
+            this.globe.pointOfView({ lat: 35.86, lng: 104.19, altitude: 2.5 }, 1500);
+            this.closeSidebar();
+        },
+
+        bindEvents() {
+            document.addEventListener('mousemove', (e) => {
+                if (this.currentHoverPoint) {
+                    this.tooltip.style.left = (e.clientX + 15) + 'px';
+                    this.tooltip.style.top = (e.clientY + 15) + 'px';
+                }
+            });
+            window.addEventListener('resize', () => {
+                this.globe.width(window.innerWidth).height(window.innerHeight);
+            });
+            // Click on globe background hides location card and resets highlight
+            this.globe.onGlobeClick(() => {
+                hideLocationCard();
+                this.resetGlobeHighlight();
+            });
+        }
+    };
+
+    // ================================================================
+    // SIDEBAR: show single news detail (from your original design)
+    // ================================================================
+    function showSingleNews(point) {
+        const list = document.getElementById('news-list');
+        document.getElementById('sidebar-title').textContent = (point.location || 'DETAIL').toUpperCase();
+
+        list.innerHTML = `
+            <div style="padding: 16px;">
+                <div class="news-meta">
+                    <span>${(point.catName || point.category || '').toUpperCase()}</span>
+                    <span>${point.time || ''}</span>
+                </div>
+                <h2 class="news-title" style="font-size:18px; margin-bottom:10px;">${point.title}</h2>
+                <p class="news-summary" style="-webkit-line-clamp:unset; overflow:visible; color:var(--text-dark); font-size:13px; line-height:1.6;">
+                    ${point.summary}
+                </p>
+                <table class="data-table">
+                    <tr><th>INTENSITY</th><td>${(point.intensity || 0).toFixed(3)}</td></tr>
+                    <tr><th>SOURCES</th><td>${point.sourceCount || point.source || 'N/A'}</td></tr>
+                    <tr><th>SENTIMENT</th><td><span class="sentiment-badge sentiment-${(point.sentiment || 'NEUTRAL').toUpperCase()}">${(point.sentiment || 'NEUTRAL').toUpperCase()}</span></td></tr>
+                    <tr><th>COORDS</th><td>${point.lat.toFixed(2)}, ${point.lng.toFixed(2)}</td></tr>
+                </table>
+            </div>
+        `;
+
+        document.getElementById('news-sidebar').classList.add('chat-mode');
+    }
+
+    // ================================================================
+    // SIDEBAR: show all search results
+    // ================================================================
+    // Track current search query and last results HTML for back navigation
+    let lastSearchQuery = '';
+    let lastResultsHTML = '';
+
+    function showSearchResults(query, results) {
+        const sidebar = document.getElementById('news-sidebar');
+        const list = document.getElementById('news-list');
+        sidebar.classList.remove('chat-mode');
+        document.getElementById('sidebar-title').textContent = `RESULTS: "${query.toUpperCase()}"`;
+        lastSearchQuery = query;
+
+        if (!results || results.length === 0) {
+            list.innerHTML = '<div class="empty-state">NO RESULTS FOUND</div>';
+            lastResultsHTML = list.innerHTML;
+            return;
+        }
+
+        list.innerHTML = results.map((news, i) => renderNewsCardHTML(news, i)).join('');
+        lastResultsHTML = list.innerHTML;
+    }
+
+    function focusOnNews(index) {
+        const news = newsData[index];
+        if (!news) return;
+        app.globe.pointOfView({ lat: news.lat, lng: news.lng, altitude: 0.8 }, 1000);
+        const controls = app.globe.controls();
+        controls.autoRotate = false;
+        clearTimeout(app.idleTimer);
+        // Highlight the corresponding point on globe
+        app.highlightGlobePoint(news.id);
+    }
+
+    // ================================================================
+    // LOCATION CARD: elegant info popup near the globe point
+    // ================================================================
+    let locCardTimer = null;
+    let locCardNewsIndex = -1;
+
+    function showLocationCard(index) {
+        const news = newsData[index];
+        if (!news) return;
+
+        locCardNewsIndex = index;
+
+        // Fly to location
+        focusOnNews(index);
+
+        // Populate card
+        const catHex = {
+            conflict: '#b85c38', politics: '#4b5e52', economy: '#8c6a51',
+            tech: '#6b7aa1', health: '#a38f7a', env: '#707d58', society: '#2d2a3e'
+        };
+        document.getElementById('loc-dot').style.color = catHex[news.category] || '#b85c38';
+        document.getElementById('loc-dot').style.background = catHex[news.category] || '#b85c38';
+        document.getElementById('loc-location').textContent = (news.location || '—').toUpperCase();
+        document.getElementById('loc-lat').textContent = news.lat.toFixed(4) + '°';
+        document.getElementById('loc-lng').textContent = news.lng.toFixed(4) + '°';
+        document.getElementById('loc-cat').textContent = (news.catName || news.category || '—').toUpperCase();
+        document.getElementById('loc-senti').textContent = (news.sentiment || 'NEUTRAL').toUpperCase();
+
+        // Show with animation (position is CSS-controlled)
+        const card = document.getElementById('loc-card');
+        card.classList.add('visible');
+
+        // Auto-hide after 5 seconds
+        clearTimeout(locCardTimer);
+        locCardTimer = setTimeout(() => {
+            card.classList.remove('visible');
+        }, 5000);
+    }
+
+    function hideLocationCard() {
+        document.getElementById('loc-card').classList.remove('visible');
+        clearTimeout(locCardTimer);
+    }
+
+    function searchNearbyNews() {
+        if (locCardNewsIndex < 0) return;
+        const news = newsData[locCardNewsIndex];
+        if (!news) return;
+
+        // Hide the location card
+        hideLocationCard();
+
+        // Mark this as a nearby search so doSearch doesn't fly away
+        isNearbySearch = true;
+
+        // ── Smooth transition: zoom in then show 2D flat map ──
+        enterNearbyMode(news.lat, news.lng, news.location || '');
+
+        // ── Trigger the nearby search with explicit geographic bounds ──
+        const searchInput = document.getElementById('search-input');
+        const cLat = news.lat.toFixed(2);
+        const cLng = news.lng.toFixed(2);
+        const locName = news.location || `${cLat},${cLng}`;
+        const query = `nearby:${locName}|lat=${cLat}|lng=${cLng}|range=${NEARBY_RANGE_DEG}`;
+        searchInput.value = `Nearby: ${locName}`;
+        // Store the structured query for doSearch to use
+        pendingNearbyQuery = query;
+        doSearch();
+    }
+
+    let pendingNearbyQuery = null;
+
+    // ================================================================
+    // NEARBY MODE: smooth 3D→2D Leaflet map transition
+    // ================================================================
+    let isInNearbyMode = false;
+    let flatMap = null;           // Leaflet map instance
+    let flatMapMarkers = [];      // Leaflet marker references
+    let nearbyCenter = { lat: 0, lng: 0 };
+
+    // ── Fixed nearby region: ±NEARBY_RANGE degrees from center ──
+    // 0.5° ≈ ~55km radius — a true "nearby" city-region view
+    const NEARBY_RANGE_DEG = 0.5;
+    const NEARBY_ZOOM = 11;       // initial zoom that fills ±0.5° nicely
+    const NEARBY_MIN_ZOOM = 10;   // don't zoom out too far
+    const NEARBY_MAX_ZOOM = 17;   // street-level detail
+
+    /** Return the L.latLngBounds for the nearby region */
+    function getNearbyBounds(lat, lng) {
+        return L.latLngBounds(
+            [lat - NEARBY_RANGE_DEG, lng - NEARBY_RANGE_DEG],
+            [lat + NEARBY_RANGE_DEG, lng + NEARBY_RANGE_DEG]
+        );
+    }
+
+    /** Check if a coordinate is within the nearby bounds */
+    function isInsideNearby(ptLat, ptLng) {
+        const dLat = Math.abs(ptLat - nearbyCenter.lat);
+        const dLng = Math.abs(ptLng - nearbyCenter.lng);
+        return dLat <= NEARBY_RANGE_DEG && dLng <= NEARBY_RANGE_DEG;
+    }
+
+    function enterNearbyMode(lat, lng, locationName) {
+        isInNearbyMode = true;
+        nearbyCenter = { lat, lng };
+
+        // Show indicator bar
+        const bar = document.getElementById('nearby-mode-bar');
+        const label = document.getElementById('nearby-location-label');
+        label.textContent = (locationName || `${lat.toFixed(2)}°, ${lng.toFixed(2)}°`).toUpperCase();
+        bar.classList.add('active');
+
+        // Update title & coords labels on the map panel
+        const locLabel = (locationName || `${lat.toFixed(2)}°, ${lng.toFixed(2)}°`).toUpperCase();
+        document.getElementById('flat-map-title').textContent = `NEARBY: ${locLabel}`;
+        document.getElementById('flat-map-coords-label').textContent =
+            `${lat.toFixed(4)}°N  ${lng.toFixed(4)}°E  |  ±${Math.round(NEARBY_RANGE_DEG * 111)}KM`;
+
+        // Update info panel
+        const rangeKm = Math.round(NEARBY_RANGE_DEG * 111);
+        document.getElementById('flat-map-info-detail').textContent =
+            `RANGE: ±${rangeKm}KM  |  LOADING...`;
+        document.getElementById('flat-map-info-coords').textContent =
+            `CENTER: ${lat.toFixed(4)}°N  ${lng.toFixed(4)}°E`;
+
+        // Stop auto-rotate
+        const controls = app.globe.controls();
+        controls.autoRotate = false;
+        clearTimeout(app.idleTimer);
+
+        // ── Step 1: Fly to the area ──
+        app.globe.pointOfView({ lat: lat, lng: lng, altitude: 0.5 }, 900);
+
+        // ── Step 2: Show overlay FIRST, then init Leaflet AFTER it's visible ──
+        setTimeout(() => {
+            const overlay = document.getElementById('flat-map-overlay');
+            overlay.classList.add('active');
+
+            // Continue lowering globe behind overlay
+            app.globe.pointOfView({ lat: lat, lng: lng, altitude: 0.08 }, 600);
+
+            // Wait for opacity transition to render the container at real size
+            // then initialize Leaflet so it gets correct dimensions
+            setTimeout(() => {
+                initFlatMap(lat, lng);
+            }, 100);
+        }, 950);
+    }
+
+    function initFlatMap(lat, lng) {
+        // Destroy existing map if any
+        if (flatMap) {
+            flatMap.remove();
+            flatMap = null;
+        }
+        flatMapMarkers = [];
+
+        const bounds = getNearbyBounds(lat, lng);
+
+        // Create Leaflet map strictly locked to the nearby region
+        flatMap = L.map('flat-map-container', {
+            center: [lat, lng],
+            zoom: NEARBY_ZOOM,
+            minZoom: NEARBY_MIN_ZOOM,
+            maxZoom: NEARBY_MAX_ZOOM,
+            maxBounds: bounds.pad(0.02),        // very tight — just enough breathing room
+            maxBoundsViscosity: 1.0,           // hard lock — can't drag outside
+            zoomControl: false,                // we'll add it at topright
+            attributionControl: false,
+            fadeAnimation: true,
+            zoomAnimation: true
+        });
+
+        // ── Kill the grey flash: override Leaflet's default #ddd background ──
+        flatMap.getContainer().style.background = '#faf7f2';
+
+        // Add zoom control at top-right so it doesn't overlap info panel
+        L.control.zoom({ position: 'topright' }).addTo(flatMap);
+
+        // ── Tile layer: OpenStreetMap (reliable, no CORS issues) ──
+        const tileLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            bounds: bounds.pad(0.05)
+        }).addTo(flatMap);
+
+        // ── Hide loading overlay once tiles start rendering ──
+        const loadingEl = document.getElementById('flat-map-loading');
+        if (loadingEl) {
+            loadingEl.style.display = 'flex'; // reset in case of re-init
+            tileLayer.once('tileload', () => {
+                loadingEl.style.transition = 'opacity 0.4s ease';
+                loadingEl.style.opacity = '0';
+                setTimeout(() => { loadingEl.style.display = 'none'; }, 400);
+            });
+        }
+
+        // ── Force correct size calculation & fit to bounds ──
+        flatMap.invalidateSize();
+        flatMap.fitBounds(bounds, { padding: [30, 30], animate: false });
+
+        // Second pass — ensures tiles render after CSS layout fully settles
+        setTimeout(() => {
+            if (flatMap) {
+                flatMap.invalidateSize();
+                flatMap.fitBounds(bounds, { padding: [30, 30], animate: false });
+            }
+        }, 250);
+
+        // ── Add crosshair at center ──
+        const crosshairIcon = L.divIcon({
+            className: 'flat-map-marker',
+            html: `<div style="width:40px;height:40px;position:relative;">
+                <svg width="40" height="40" viewBox="0 0 40 40" style="position:absolute;top:0;left:0;">
+                    <line x1="0" y1="20" x2="15" y2="20" stroke="#b85c38" stroke-width="1.5" stroke-dasharray="4,3"/>
+                    <line x1="25" y1="20" x2="40" y2="20" stroke="#b85c38" stroke-width="1.5" stroke-dasharray="4,3"/>
+                    <line x1="20" y1="0" x2="20" y2="15" stroke="#b85c38" stroke-width="1.5" stroke-dasharray="4,3"/>
+                    <line x1="20" y1="25" x2="20" y2="40" stroke="#b85c38" stroke-width="1.5" stroke-dasharray="4,3"/>
+                    <circle cx="20" cy="20" r="3" fill="none" stroke="#b85c38" stroke-width="1.5"/>
+                </svg>
+            </div>`,
+            iconSize: [40, 40],
+            iconAnchor: [20, 20]
+        });
+        L.marker([lat, lng], { icon: crosshairIcon, interactive: false }).addTo(flatMap);
+
+        // ── Dashed border around the search region (visible when zoomed in) ──
+        L.rectangle(bounds, {
+            color: '#b85c38',
+            weight: 1.5,
+            dashArray: '6,4',
+            fill: false,
+            opacity: 0.25,
+            interactive: false
+        }).addTo(flatMap);
+
+        // ── Add news event markers (only those inside bounds) ──
+        addFlatMapMarkers();
+    }
+
+    function addFlatMapMarkers() {
+        if (!flatMap) return;
+
+        // Clear existing markers
+        flatMapMarkers.forEach(m => flatMap.removeLayer(m));
+        flatMapMarkers = [];
+
+        const catHex = {
+            conflict: '#b85c38', politics: '#4b5e52', economy: '#8c6a51',
+            tech: '#6b7aa1', health: '#a38f7a', env: '#707d58', society: '#2d2a3e'
+        };
+
+        let inRangeCount = 0;
+
+        newsData.forEach((d, idx) => {
+            // ── Only show markers inside the defined nearby range ──
+            if (!isInsideNearby(d.lat, d.lng)) return;
+
+            inRangeCount++;
+            const col = catHex[d.category] || '#b85c38';
+
+            const icon = L.divIcon({
+                className: 'flat-map-marker',
+                html: `<div class="flat-map-dot" style="color:${col};">
+                    <div class="flat-map-dot-pulse"></div>
+                    <div class="flat-map-dot-inner" style="background:${col};"></div>
+                </div>`,
+                iconSize: [24, 24],
+                iconAnchor: [12, 12],
+                popupAnchor: [0, -14]
+            });
+
+            const marker = L.marker([d.lat, d.lng], { icon: icon }).addTo(flatMap);
+
+            // ── Click: populate the left/right side panels instead of popup ──
+            marker.on('click', () => {
+                showNearbySidePanels(d, idx);
+            });
+
+            flatMapMarkers.push(marker);
+        });
+
+        // Update info panel with actual count
+        const rangeKm = Math.round(NEARBY_RANGE_DEG * 111);
+        document.getElementById('flat-map-info-detail').textContent =
+            `EVENTS: ${inRangeCount}  |  RANGE: ±${rangeKm}KM`;
+    }
+
+    /** Show the left (geo) and right (news) side panels for a clicked marker */
+    function showNearbySidePanels(d, idx) {
+        const catHex = {
+            conflict: '#b85c38', politics: '#4b5e52', economy: '#8c6a51',
+            tech: '#6b7aa1', health: '#a38f7a', env: '#707d58', society: '#2d2a3e'
+        };
+        const col = catHex[d.category] || '#b85c38';
+
+        // ── Left panel: geo info ──
+        document.getElementById('np-location').textContent = (d.location || '—').toUpperCase();
+        document.getElementById('np-lat').textContent = d.lat.toFixed(4) + '°';
+        document.getElementById('np-lng').textContent = d.lng.toFixed(4) + '°';
+        document.getElementById('np-cat').innerHTML =
+            `<span class="np-cat-dot" style="background:${col}"></span>${(d.catName || d.category || '—').toUpperCase()}`;
+        document.getElementById('np-senti').textContent = (d.sentiment || 'NEUTRAL').toUpperCase();
+
+        // ── Right panel: news brief ──
+        document.getElementById('np-title').textContent = d.title || '—';
+        document.getElementById('np-summary').textContent = d.summary || '—';
+        document.getElementById('np-source').textContent = d.source ? `SOURCE: ${d.source.toUpperCase()}` : '';
+        document.getElementById('np-time').textContent = d.time ? `TIME: ${d.time}` : '';
+
+        // ── Activate both panels ──
+        document.getElementById('nearby-panel-left').classList.add('active');
+        document.getElementById('nearby-panel-right').classList.add('active');
+    }
+
+    /** Hide side panels (called on exitNearbyMode) */
+    function hideNearbySidePanels() {
+        document.getElementById('nearby-panel-left').classList.remove('active');
+        document.getElementById('nearby-panel-right').classList.remove('active');
+    }
+
+    function exitNearbyMode() {
+        if (!isInNearbyMode) return;
+        isInNearbyMode = false;
+
+        // Hide 2D overlay
+        const overlay = document.getElementById('flat-map-overlay');
+        overlay.classList.remove('active');
+
+        // Hide side panels
+        hideNearbySidePanels();
+
+        // Hide indicator bar
+        document.getElementById('nearby-mode-bar').classList.remove('active');
+
+        // Destroy Leaflet map after fade-out
+        setTimeout(() => {
+            if (flatMap) {
+                flatMap.remove();
+                flatMap = null;
+                flatMapMarkers = [];
+            }
+        }, 900);
+
+        // Restore controls
+        const controls = app.globe.controls();
+        controls.minDistance = 101;
+        controls.maxDistance = 1000;
+        controls.minPolarAngle = 0;
+        controls.maxPolarAngle = Math.PI;
+        controls.enableRotate = true;
+
+        // Fly back to global view
+        app.globe.pointOfView({ lat: 35.86, lng: 104.19, altitude: 2.5 }, 1500);
+
+        // Re-enable auto-rotate after settling
+        setTimeout(() => {
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.5;
+        }, 2000);
+    }
+
+    // ================================================================
+    // REGION BORDERS: (kept as stub for compatibility)
+    // ================================================================
+    function clearRegionBorders() {
+        // No-op
+    }
+
+    function closeNearbyMap() {
+        exitNearbyMode();
+    }
+
+    // Extract coordinate rings from GeoJSON geometry
+    function extractCoords(geometry) {
+        if (!geometry) return [];
+        if (geometry.type === 'Polygon') {
+            return geometry.coordinates;
+        }
+        if (geometry.type === 'MultiPolygon') {
+            return geometry.coordinates.flat();
+        }
+        return [];
+    }
+
+    // ================================================================
+    // LONG PRESS: press-and-hold on news card to enter chat
+    // ================================================================
+    let longPressTimer = null;
+    let longPressIndex = -1;
+    let longPressTriggered = false;
+    let longPressBar = null;
+    const LONG_PRESS_MS = 600;
+
+    function onNewsCardClick(index) {
+        // If long press just triggered, skip the click
+        if (longPressTriggered) {
+            longPressTriggered = false;
+            return;
+        }
+        showLocationCard(index);
+    }
+
+    function onNewsCardDown(index, event) {
+        event.preventDefault();
+        longPressIndex = index;
+        longPressTriggered = false;
+
+        // Find the news-card element from the event target
+        const card = event.currentTarget || event.target.closest('.news-card');
+        if (!card) return;
+
+        // Ensure there's a progress bar inside the card
+        let bar = card.querySelector('.long-press-bar');
+        if (!bar) {
+            bar = document.createElement('div');
+            bar.className = 'long-press-bar';
+            card.appendChild(bar);
+        }
+
+        // Reset bar
+        bar.classList.remove('active');
+        bar.style.width = '0';
+        longPressBar = bar;
+
+        // Start animation after a frame so transition triggers
+        requestAnimationFrame(() => {
+            bar.classList.add('active');
+        });
+
+        longPressTimer = setTimeout(() => {
+            // Clean up bar
+            if (longPressBar) {
+                longPressBar.classList.remove('active');
+                longPressBar.style.width = '0';
+            }
+            longPressTriggered = true;
+            openNewsChat(longPressIndex);
+        }, LONG_PRESS_MS);
+    }
+
+    function onNewsCardUp() {
+        if (longPressTimer) {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+        }
+        // Reset bar
+        if (longPressBar) {
+            longPressBar.classList.remove('active');
+            longPressBar.style.width = '0';
+            longPressBar = null;
+        }
+    }
+
+    // Cancel long press on any mouse leave
+    function onNewsCardLeave() {
+        onNewsCardUp();
+    }
+
+    // ================================================================
+    // NEWS CHAT: click a news item to discuss it with AI
+    // ================================================================
+    let chatHistory = [];      // conversation messages for current news
+    let chatNewsItem = null;   // the news item being discussed
+    let chatAbort = null;      // AbortController for chat requests
+
+    function openNewsChat(index) {
+        const news = newsData[index];
+        if (!news) return;
+
+        chatNewsItem = news;
+        chatHistory = [];
+
+        // Hide location card when entering chat
+        hideLocationCard();
+
+        // Focus globe on this news
+        focusOnNews(index);
+
+        // Switch to chat mode — panel slides to center
+        const sidebar = document.getElementById('news-sidebar');
+        sidebar.classList.add('chat-mode');
+
+        // Build chat view
+        const list = document.getElementById('news-list');
+        document.getElementById('sidebar-title').textContent = (news.location || news.title).toUpperCase();
+
+        list.innerHTML = `
+            <div class="chat-view">
+                <button class="chat-back-btn" onclick="goBackToResults()">&#8592; BACK TO RESULTS</button>
+                <div class="chat-news-brief">
+                    <div class="news-meta">
+                        <span>${(news.catName || news.category || '').toUpperCase()}</span>
+                        <span>${news.time || ''}</span>
+                    </div>
+                    <div class="news-title">${news.title}</div>
+                    <div class="news-summary">${news.summary}</div>
+                    ${news.url ? `<a href="${news.url}" target="_blank" style="font-family:var(--font-mono); font-size:9px; color:var(--brand-orange); text-decoration:none; margin-top:6px; display:inline-block;">URL</a>` : ''}
+                </div>
+                <div class="chat-messages" id="chat-messages">
+                    <div class="chat-msg assistant">
+                        <div class="msg-label">NEWSTAKER AI</div>
+                        <div>I can help you analyze and discuss this news story. Feel free to ask me anything — background context, potential impact, related events, or your own questions about "${news.title}".</div>
+                    </div>
+                </div>
+                <div class="chat-input-bar">
+                    <input type="text" id="chat-input" placeholder="ASK ABOUT THIS NEWS..." onkeydown="if(event.key==='Enter'){event.preventDefault();sendChatMessage();}">
+                    <button class="chat-send-btn" id="chat-send-btn" onclick="sendChatMessage()">SEND</button>
+                </div>
+            </div>
+        `;
+
+        // Focus input
+        setTimeout(() => {
+            const chatInput = document.getElementById('chat-input');
+            if (chatInput) chatInput.focus();
+        }, 100);
+    }
+
+    function goBackToResults() {
+        // Cancel any ongoing chat request
+        if (chatAbort) { chatAbort.abort(); chatAbort = null; }
+        chatHistory = [];
+        chatNewsItem = null;
+
+        const sidebar = document.getElementById('news-sidebar');
+        sidebar.classList.remove('chat-mode');
+
+        const list = document.getElementById('news-list');
+        document.getElementById('sidebar-title').textContent = lastSearchQuery
+            ? `RESULTS: "${lastSearchQuery.toUpperCase()}"`
+            : 'GLOBAL TRENDING';
+        list.innerHTML = lastResultsHTML;
+    }
+
+    async function sendChatMessage() {
+        const input = document.getElementById('chat-input');
+        const btn = document.getElementById('chat-send-btn');
+        const msgContainer = document.getElementById('chat-messages');
+        if (!input || !chatNewsItem) return;
+
+        const userText = input.value.trim();
+        if (!userText) return;
+
+        // Show user message
+        const userMsgEl = document.createElement('div');
+        userMsgEl.className = 'chat-msg user';
+        userMsgEl.innerHTML = `<div class="msg-label">YOU</div><div>${escapeHtml(userText)}</div>`;
+        msgContainer.appendChild(userMsgEl);
+        msgContainer.scrollTop = msgContainer.scrollHeight;
+
+        // Clear input
+        input.value = '';
+        input.disabled = true;
+        btn.disabled = true;
+
+        // Add to history
+        chatHistory.push({ role: 'user', content: userText });
+
+        // Show typing indicator
+        const typingEl = document.createElement('div');
+        typingEl.className = 'chat-msg assistant typing';
+        typingEl.innerHTML = `<div class="msg-label">NEWSTAKER AI</div><div><span class="dots"></span></div>`;
+        msgContainer.appendChild(typingEl);
+        msgContainer.scrollTop = msgContainer.scrollHeight;
+
+        // Cancel previous request
+        if (chatAbort) chatAbort.abort();
+        chatAbort = new AbortController();
+
+        try {
+            const systemPrompt = `You are a news analyst AI for NEWSTAKER, a global data journalism platform.
+
+You are discussing a specific news story with the user. Here is the news context:
+
+TITLE: ${chatNewsItem.title}
+SUMMARY: ${chatNewsItem.summary}
+CATEGORY: ${chatNewsItem.catName || chatNewsItem.category}
+LOCATION: ${chatNewsItem.location}
+SENTIMENT: ${chatNewsItem.sentiment}
+SOURCES: ${chatNewsItem.source}
+
+Provide insightful, well-informed analysis. Be concise but thorough.
+If the user asks about related topics, connect them back to this news context when relevant.
+Use markdown-style formatting sparingly — keep responses clean and readable.
+Answer in the same language the user uses.`;
+
+            const messages = [
+                { role: 'system', content: systemPrompt },
+                ...chatHistory
+            ];
+
+            const response = await fetch('/api/llm', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...getApiHeaders() },
+                body: JSON.stringify({
+                    model: LLM_MODEL,
+                    messages: messages,
+                    temperature: 0.5,
+                    max_tokens: 2000
+                }),
+                signal: chatAbort.signal
+            });
+
+            if (!response.ok) throw new Error(`API returned ${response.status}`);
+
+            const data = await response.json();
+            const reply = data.choices?.[0]?.message?.content || 'Sorry, I could not generate a response.';
+
+            // Add to history
+            chatHistory.push({ role: 'assistant', content: reply });
+
+            // Replace typing indicator with actual reply
+            typingEl.classList.remove('typing');
+            typingEl.innerHTML = `<div class="msg-label">NEWSTAKER AI</div><div>${formatChatReply(reply)}</div>`;
+            msgContainer.scrollTop = msgContainer.scrollHeight;
+
+        } catch (err) {
+            if (err.name === 'AbortError') return;
+            typingEl.classList.remove('typing');
+            typingEl.innerHTML = `<div class="msg-label">NEWSTAKER AI</div><div style="color:var(--brand-orange);">Error: ${err.message}. Please try again.</div>`;
+            msgContainer.scrollTop = msgContainer.scrollHeight;
+        } finally {
+            input.disabled = false;
+            btn.disabled = false;
+            input.focus();
+        }
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function formatChatReply(text) {
+        // Simple markdown-ish formatting
+        return text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/\n\n/g, '<br><br>')
+            .replace(/\n/g, '<br>');
+    }
+
+    // ================================================================
+    // SEARCH: Real News API or LLM faker mode
+    // ================================================================
+    let searchAbort = null;
+    let isNearbySearch = false;
+
+    async function doSearch() {
+        const input = document.getElementById('search-input');
+        const query = input.value.trim();
+        if (!query) return;
+
+        // Exit nearby mode if doing a non-nearby search
+        if (!isNearbySearch) exitNearbyMode();
+
+        // Cancel previous request
+        if (searchAbort) searchAbort.abort();
+        searchAbort = new AbortController();
+
+        const loading = document.getElementById('search-loading');
+        const btn = document.getElementById('search-btn');
+        loading.classList.add('active');
+        btn.disabled = true;
+        btn.textContent = 'SEARCHING...';
+
+        // ── Determine if this is a nearby search with geo constraints ──
+        const isNearby = !!pendingNearbyQuery;
+        let nearbyLat = 0, nearbyLng = 0, nearbyRange = NEARBY_RANGE_DEG;
+        let nearbyLocName = '';
+
+        if (isNearby && pendingNearbyQuery) {
+            const parts = pendingNearbyQuery.split('|');
+            nearbyLocName = (parts[0] || '').replace('nearby:', '');
+            parts.forEach(p => {
+                if (p.startsWith('lat=')) nearbyLat = parseFloat(p.split('=')[1]) || 0;
+                if (p.startsWith('lng=')) nearbyLng = parseFloat(p.split('=')[1]) || 0;
+                if (p.startsWith('range=')) nearbyRange = parseFloat(p.split('=')[1]) || NEARBY_RANGE_DEG;
+            });
+            pendingNearbyQuery = null;
+        }
+
+        try {
+            let results = [];
+            const sourceParam = useRealAPI ? 'real' : 'llm';
+            const langParam = currentLang === 'zh' ? 'zh' : 'en';
+
+            // All search goes through server API
+            let apiUrl;
+            if (isNearby) {
+                apiUrl = `/api/news/nearby?lat=${nearbyLat}&lng=${nearbyLng}&location=${encodeURIComponent(nearbyLocName)}&lang=${langParam}&source=${sourceParam}`;
+            } else {
+                apiUrl = `/api/news/search?q=${encodeURIComponent(query)}&lang=${langParam}&source=${sourceParam}`;
+            }
+
+            const response = await fetch(apiUrl, { signal: searchAbort.signal, headers: getApiHeaders() });
+            if (!response.ok) throw new Error(`API returned ${response.status}`);
+
+            const data = await response.json();
+            if (data.error) throw new Error(data.error);
+            results = data.results || [];
+
+            // For nearby: hard-filter outside bounding box
+            if (isNearby && results.length > 0) {
+                results = results.filter(item => {
+                    const iLat = parseFloat(item.lat) || 0;
+                    const iLng = parseFloat(item.lng) || 0;
+                    return Math.abs(iLat - nearbyLat) <= nearbyRange &&
+                           Math.abs(iLng - nearbyLng) <= nearbyRange;
+                });
+            }
+
+            // Build newsData from results
+            newsData = buildNewsData(results);
+
+            // Update globe markers
+            app.updateGlobeData();
+
+            // Show results in sidebar
+            showSearchResults(query, newsData);
+
+            // Fly to center of results (skip if nearby search already zoomed in)
+            if (newsData.length > 0 && !isNearbySearch) {
+                const avgLat = newsData.reduce((s, d) => s + d.lat, 0) / newsData.length;
+                const avgLng = newsData.reduce((s, d) => s + d.lng, 0) / newsData.length;
+                app.globe.pointOfView({ lat: avgLat, lng: avgLng, altitude: 1.8 }, 1500);
+            }
+            // Update 2D map markers if in nearby mode
+            if (isInNearbyMode && flatMap) {
+                setTimeout(() => addFlatMapMarkers(), 200);
+            }
+            isNearbySearch = false; // reset flag
+
+        } catch (err) {
+            if (err.name === 'AbortError') return;
+            console.error('Search error:', err);
+            showError(`SEARCH FAILED: ${err.message}`);
+        } finally {
+            loading.classList.remove('active');
+            btn.disabled = false;
+            btn.textContent = 'SEARCH';
+        }
+    }
+
+    // ================================================================
+    // STOCK IMPACT: AI analysis of news → 3 UP + 3 DOWN stocks
+    // ================================================================
+    let stockImpactAbort = null;
+    let lastStockImpact = null; // { newsItem, gainers, losers, summary }
+
+    function toggleMarketIndices() {
+        const header = document.getElementById('fin-header');
+        const data = document.getElementById('fin-data');
+        header.classList.toggle('collapsed');
+        data.classList.toggle('collapsed');
+    }
+
+    async function analyzeStockImpact(index) {
+        const news = newsData[index];
+        if (!news) return;
+
+        // Collapse market indices section
+        const finHeader = document.getElementById('fin-header');
+        const finData = document.getElementById('fin-data');
+        if (!finHeader.classList.contains('collapsed')) {
+            finHeader.classList.add('collapsed');
+            finData.classList.add('collapsed');
+        }
+
+        const finPanel = document.getElementById('financial-panel');
+        // Get or create impact container
+        let impactContainer = document.getElementById('fin-impact');
+        if (!impactContainer) {
+            impactContainer = document.createElement('div');
+            impactContainer.id = 'fin-impact';
+            // Insert before the disclaimer
+            const disclaimer = finPanel.querySelector('.disclaimer');
+            finPanel.insertBefore(impactContainer, disclaimer);
+        }
+
+        // Show loading state
+        impactContainer.innerHTML = `
+            <div class="fin-impact-header">
+                <span class="impact-dot"></span>
+                NEWS IMPACT ANALYSIS
+            </div>
+            <div class="impact-loading"><span>ANALYZING MARKET IMPACT ...</span></div>
+        `;
+
+        // Cancel previous request
+        if (stockImpactAbort) stockImpactAbort.abort();
+        stockImpactAbort = new AbortController();
+
+        try {
+            const systemPrompt = `You are a financial market analyst AI for NEWSTAKER.
+
+Given a news event, analyze which 6 stocks would be MOST impacted — 3 that would RISE and 3 that would FALL.
+
+IMPORTANT RULES:
+1. Return ONLY valid JSON — no markdown, no explanation, no backticks.
+2. Pick exactly 6 real, well-known stock tickers (e.g. AAPL, TSLA, NVDA, BA, LMT, JPM, MSFT, GOOG, AMZN, etc.)
+3. The "gainers" array must have exactly 3 stocks predicted to go UP.
+4. The "losers" array must have exactly 3 stocks predicted to go DOWN.
+5. For each stock provide: ticker, company name, estimated percentage move (positive for gainers, negative for losers), and a very brief reason (under 12 words).
+6. Be realistic and grounded in financial logic.
+
+Return this exact JSON structure:
+{
+  "gainers": [
+    { "ticker": "LMT", "name": "Lockheed Martin", "change_pct": 3.2, "reason": "Defense spending surge from conflict" }
+  ],
+  "losers": [
+    { "ticker": "AAPL", "name": "Apple Inc.", "change_pct": -2.3, "reason": "Supply chain disruption risk" }
+  ],
+  "summary": "One sentence overall market impact"
+}`;
+
+            const response = await fetch('/api/llm', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...getApiHeaders() },
+                body: JSON.stringify({
+                    model: LLM_MODEL,
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: `News: "${news.title}"\nSummary: ${news.summary}\nCategory: ${news.catName || news.category}\nLocation: ${news.location}\nSentiment: ${news.sentiment}\n\nAnalyze 3 stocks that go UP and 3 that go DOWN.` }
+                    ],
+                    temperature: 0.3,
+                    max_tokens: 1200
+                }),
+                signal: stockImpactAbort.signal
+            });
+
+            if (!response.ok) throw new Error(`API returned ${response.status}`);
+
+            const data = await response.json();
+            const content = data.choices?.[0]?.message?.content || '';
+
+            let parsed;
+            try {
+                parsed = JSON.parse(content);
+            } catch {
+                const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
+                if (jsonMatch) {
+                    parsed = JSON.parse(jsonMatch[1].trim());
+                } else {
+                    const objMatch = content.match(/\{[\s\S]*\}/);
+                    if (objMatch) parsed = JSON.parse(objMatch[0]);
+                    else throw new Error('Could not parse response');
+                }
+            }
+
+            const gainers = parsed.gainers || [];
+            const losers = parsed.losers || [];
+
+            // Save for stock chat
+            lastStockImpact = { newsItem: news, gainers, losers, summary: parsed.summary || '' };
+
+            // Helper to render a stock row (clickable)
+            const renderStock = (s, isUp, stockIdx) => {
+                const cls = isUp ? 'up' : 'down';
+                const arrow = isUp ? '▲' : '▼';
+                const sign = isUp ? '+' : '';
+                const side = isUp ? 'gainer' : 'loser';
+                return `
+                <div class="fin-impact-item" onclick="openStockChat('${side}', ${stockIdx})" title="Click to discuss this analysis">
+                    <div class="impact-top">
+                        <span class="impact-ticker">${s.ticker}</span>
+                        <span class="impact-direction ${cls}">${arrow} ${sign}${s.change_pct}%</span>
+                    </div>
+                    <div class="impact-reason">${s.name} — ${s.reason}</div>
+                </div>`;
+            };
+
+            // Render impact results: gainers + losers
+            impactContainer.innerHTML = `
+                <div class="fin-impact-header">
+                    <span class="impact-dot"></span>
+                    PREDICTED GAINERS
+                </div>
+                ${gainers.map((s, i) => renderStock(s, true, i)).join('')}
+                <div class="fin-impact-header" style="border-top: 2px solid #5a7d5a;">
+                    <span class="impact-dot" style="background:#b85c38;"></span>
+                    PREDICTED LOSERS
+                </div>
+                ${losers.map((s, i) => renderStock(s, false, i)).join('')}
+                <div style="padding:5px 10px; font-family:var(--font-mono); font-size:8px; color:#b0a89e; border-top: 1px dashed var(--grid-line);">
+                    ${parsed.summary || ''}
+                </div>
+            `;
+
+        } catch (err) {
+            if (err.name === 'AbortError') return;
+            impactContainer.innerHTML = `
+                <div class="fin-impact-header">
+                    <span class="impact-dot"></span>
+                    NEWS IMPACT
+                </div>
+                <div class="impact-loading" style="color:var(--brand-orange);">ANALYSIS FAILED: ${err.message}</div>
+            `;
+        }
+    }
+
+    // ================================================================
+    // STOCK CHAT: click a stock in impact analysis to discuss why
+    // ================================================================
+    function openStockChat(side, idx) {
+        if (!lastStockImpact) return;
+        const stock = side === 'gainer'
+            ? lastStockImpact.gainers[idx]
+            : lastStockImpact.losers[idx];
+        if (!stock) return;
+
+        const news = lastStockImpact.newsItem;
+        const direction = side === 'gainer' ? 'UP' : 'DOWN';
+        const sign = side === 'gainer' ? '+' : '';
+
+        // Reuse the existing chat infrastructure
+        chatNewsItem = news;
+        chatHistory = [];
+
+        hideLocationCard();
+
+        const sidebar = document.getElementById('news-sidebar');
+        sidebar.classList.add('chat-mode');
+
+        const list = document.getElementById('news-list');
+        document.getElementById('sidebar-title').textContent = `${stock.ticker} ANALYSIS`;
+
+        list.innerHTML = `
+            <div class="chat-view">
+                <button class="chat-back-btn" onclick="goBackToResults()">&#8592; BACK TO RESULTS</button>
+                <div class="chat-news-brief" style="border-left: 3px solid ${side === 'gainer' ? '#5a7d5a' : 'var(--brand-orange)'};">
+                    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;">
+                        <span style="font-family:var(--font-display); font-size:16px; color:var(--text-dark);">${stock.ticker}</span>
+                        <span style="font-family:var(--font-mono); font-size:13px; font-weight:700; color:${side === 'gainer' ? '#5a7d5a' : 'var(--brand-orange)'};">${side === 'gainer' ? '▲' : '▼'} ${sign}${stock.change_pct}%</span>
+                    </div>
+                    <div style="font-family:var(--font-body); font-size:12px; color:var(--text-dark); margin-bottom:4px;">${stock.name}</div>
+                    <div style="font-family:var(--font-mono); font-size:10px; color:#6b6580;">${stock.reason}</div>
+                    <div style="margin-top:8px; padding-top:8px; border-top:1px dashed var(--grid-line);">
+                        <div style="font-family:var(--font-mono); font-size:9px; color:#b0a89e; letter-spacing:0.5px;">TRIGGERED BY NEWS</div>
+                        <div class="news-title" style="font-size:12px; margin-top:4px;">${news.title}</div>
+                    </div>
+                </div>
+                <div class="chat-messages" id="chat-messages">
+                    <div class="chat-msg assistant typing">
+                        <div class="msg-label">NEWSTAKER AI</div>
+                        <div><span class="dots"></span></div>
+                    </div>
+                </div>
+                <div class="chat-input-bar">
+                    <input type="text" id="chat-input" placeholder="ASK FOLLOW-UP QUESTIONS..." onkeydown="if(event.key==='Enter'){event.preventDefault();sendChatMessage();}">
+                    <button class="chat-send-btn" id="chat-send-btn" onclick="sendChatMessage()">SEND</button>
+                </div>
+            </div>
+        `;
+
+        // Auto-ask the analysis question
+        const autoQuestion = currentLang === 'zh'
+            ? `请详细解释一下：为什么新闻"${news.title}"会导致${stock.name}（${stock.ticker}）的股价预计${side === 'gainer' ? '上涨' : '下跌'} ${sign}${stock.change_pct}%？你的分析理由是"${stock.reason}"，能否从行业背景、公司业务关联、市场情绪等角度展开详细说明？`
+            : `Explain in detail: Why would the news "${news.title}" cause ${stock.name} (${stock.ticker}) to move ${direction} by ${sign}${stock.change_pct}%? Your stated reason was "${stock.reason}". Please elaborate on the industry context, business relevance, and market sentiment factors behind this prediction.`;
+
+        chatHistory.push({ role: 'user', content: autoQuestion });
+
+        // Cancel any previous request
+        if (chatAbort) chatAbort.abort();
+        chatAbort = new AbortController();
+
+        const allStocks = [
+            ...lastStockImpact.gainers.map(s => `${s.ticker} (${s.name}): +${s.change_pct}% — ${s.reason}`),
+            ...lastStockImpact.losers.map(s => `${s.ticker} (${s.name}): ${s.change_pct}% — ${s.reason}`)
+        ].join('\n');
+
+        const systemPrompt = `You are a financial analyst AI for NEWSTAKER.
+
+The user clicked on a specific stock from your previous impact analysis to understand the reasoning.
+
+NEWS CONTEXT:
+TITLE: ${news.title}
+SUMMARY: ${news.summary}
+CATEGORY: ${news.catName || news.category}
+LOCATION: ${news.location}
+
+YOUR FULL ANALYSIS WAS:
+${allStocks}
+OVERALL: ${lastStockImpact.summary}
+
+The user is now asking about: ${stock.ticker} (${stock.name}), predicted ${direction} ${sign}${stock.change_pct}%.
+Your stated reason: "${stock.reason}"
+
+Provide a thorough, well-structured explanation. Cover:
+1. How this news directly impacts the company's business
+2. Industry/sector dynamics at play
+3. Historical precedents if relevant
+4. Market sentiment and investor psychology factors
+5. Potential risks to this prediction
+
+Be specific and insightful. Answer in the same language the user uses.`;
+
+        const messages = [
+            { role: 'system', content: systemPrompt },
+            ...chatHistory
+        ];
+
+        (async () => {
+            try {
+                const response = await fetch('/api/llm', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...getApiHeaders() },
+                    body: JSON.stringify({
+                        model: LLM_MODEL,
+                        messages: messages,
+                        temperature: 0.5,
+                        max_tokens: 2500
+                    }),
+                    signal: chatAbort.signal
+                });
+
+                if (!response.ok) throw new Error(`API returned ${response.status}`);
+
+                const data = await response.json();
+                const reply = data.choices?.[0]?.message?.content || 'Sorry, I could not generate a response.';
+
+                chatHistory.push({ role: 'assistant', content: reply });
+
+                const msgContainer = document.getElementById('chat-messages');
+                if (msgContainer) {
+                    const typingEl = msgContainer.querySelector('.chat-msg.typing');
+                    if (typingEl) {
+                        typingEl.classList.remove('typing');
+                        typingEl.innerHTML = `<div class="msg-label">NEWSTAKER AI</div><div>${formatChatReply(reply)}</div>`;
+                    }
+                    msgContainer.scrollTop = msgContainer.scrollHeight;
+                }
+            } catch (err) {
+                if (err.name === 'AbortError') return;
+                const msgContainer = document.getElementById('chat-messages');
+                if (msgContainer) {
+                    const typingEl = msgContainer.querySelector('.chat-msg.typing');
+                    if (typingEl) {
+                        typingEl.classList.remove('typing');
+                        typingEl.innerHTML = `<div class="msg-label">NEWSTAKER AI</div><div style="color:var(--brand-orange);">Analysis failed: ${err.message}. Please try again.</div>`;
+                    }
+                }
+            } finally {
+                const input = document.getElementById('chat-input');
+                const btn = document.getElementById('chat-send-btn');
+                if (input) { input.disabled = false; input.focus(); }
+                if (btn) btn.disabled = false;
+            }
+        })();
+    }
+
+    // ================================================================
+    // LANGUAGE TOGGLE: EN ↔ 中文
+    // ================================================================
+    let currentLang = 'en'; // 'en' or 'zh'
+
+    const langStrings = {
+        en: {
+            searchPlaceholder: 'SEARCH: ENTER A TOPIC, EVENT, OR REGION...',
+            searchBtn: 'SEARCH',
+            searching: 'SEARCHING...',
+            resetView: '[ RESET VIEW ]',
+            globalTrending: 'GLOBAL TRENDING',
+            loadingHotspots: 'LOADING GLOBAL HOTSPOTS...',
+            queryingData: 'QUERYING GLOBAL DATA MESH ...',
+            noResults: 'NO RESULTS FOUND',
+            disclaimer: 'DEMO DATA ONLY // NOT FINANCIAL ADVICE',
+            marketIndices: 'MARKET INDICES',
+            eventLocation: 'EVENT LOCATION',
+            searchNearby: 'SEARCH NEARBY NEWS ▸',
+            backToResults: '← BACK TO RESULTS',
+            chatPlaceholder: 'ASK ABOUT THIS NEWS...',
+            send: 'SEND',
+            langLabel: 'EN / 中'
+        },
+        zh: {
+            searchPlaceholder: '搜索：输入话题、事件或地区...',
+            searchBtn: '搜索',
+            searching: '搜索中...',
+            resetView: '[ 重置视角 ]',
+            globalTrending: '全球热点',
+            loadingHotspots: '加载全球热点中...',
+            queryingData: '正在查询全球数据网络 ...',
+            noResults: '未找到相关结果',
+            disclaimer: '仅供演示 // 非投资建议',
+            marketIndices: '市场指数',
+            eventLocation: '事件地点',
+            searchNearby: '搜索周边新闻 ▸',
+            backToResults: '← 返回结果',
+            chatPlaceholder: '关于这条新闻提问...',
+            send: '发送',
+            langLabel: '中 / EN'
+        }
+    };
+
+    function toggleLanguage() {
+        currentLang = currentLang === 'en' ? 'zh' : 'en';
+        const s = langStrings[currentLang];
+
+        // Update UI texts
+        document.getElementById('search-input').placeholder = s.searchPlaceholder;
+        document.getElementById('search-btn').textContent = s.searchBtn;
+        document.querySelector('.header-btn[onclick="app.resetView()"]').textContent = s.resetView;
+        document.getElementById('lang-btn').textContent = s.langLabel;
+        document.getElementById('search-loading').querySelector('span').textContent = s.queryingData;
+
+        // Financial panel
+        document.querySelector('#fin-header span:first-child').textContent = s.marketIndices;
+        document.querySelector('#financial-panel .disclaimer').textContent = s.disclaimer;
+
+        // Sidebar header (only if showing trending)
+        const sidebarTitle = document.getElementById('sidebar-title');
+        if (!lastSearchQuery && sidebarTitle.textContent.match(/GLOBAL TRENDING|全球热点/)) {
+            sidebarTitle.textContent = s.globalTrending;
+        }
+
+        // Loc card
+        const locHeader = document.querySelector('.loc-card-header');
+        if (locHeader) {
+            const span = locHeader.querySelectorAll('span');
+            if (span.length > 1) span[1].textContent = s.eventLocation;
+        }
+        const nearbyBtn = document.getElementById('loc-nearby-btn');
+        if (nearbyBtn) nearbyBtn.textContent = s.searchNearby;
+    }
+
+    function showError(msg) {
+        const toast = document.getElementById('error-toast');
+        toast.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 4000);
+    }
+
+    // ================================================================
+    // TRIPLE-CLICK OK: toggle LLM demo ↔ newsdata.io real API
+    // ================================================================
+    document.getElementById('status-ok-btn').addEventListener('click', () => {
+        okClickCount++;
+        if (okClickTimer) clearTimeout(okClickTimer);
+        okClickTimer = setTimeout(() => { okClickCount = 0; }, 800);
+
+        if (okClickCount >= 3) {
+            okClickCount = 0;
+            clearTimeout(okClickTimer);
+            useRealAPI = !useRealAPI;
+
+            const statusEl = document.getElementById('status-ok-btn');
+
+            if (useRealAPI) {
+                // Switch to real API mode
+                statusEl.innerHTML = '<span class="status-dot" style="background:#4CAF50;"></span>LIVE';
+                statusEl.title = 'LIVE MODE — Real news from newsdata.io';
+                statusEl.style.color = '#4CAF50';
+                statusEl.style.borderColor = '#4CAF50';
+                showError('📡 LIVE MODE — Fetching real news from newsdata.io');
+            } else {
+                // Switch back to LLM demo mode
+                statusEl.innerHTML = '<span class="status-dot"></span>OK';
+                statusEl.title = 'System Status: OK — LLM-generated news (demo)';
+                statusEl.style.color = '';
+                statusEl.style.borderColor = '';
+                showError('🤖 DEMO MODE — AI-generated news');
+            }
+
+            // Reload news with new mode
+            loadTrendingNews();
+        }
+    });
+
+    // ================================================================
+    // KEYBOARD SHORTCUTS
+    // ================================================================
+    document.getElementById('search-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            doSearch();
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+            e.preventDefault();
+            document.getElementById('search-input').focus();
+        }
+    });
+
+    // ================================================================
+    // INIT: load globe + auto-fetch trending news
+    // ================================================================
+    window.addEventListener('DOMContentLoaded', () => {
+        app.init();
+        // Only auto-load if user already has a verified key (from sessionStorage)
+        if (_userApiKey) {
+            loadTrendingNews();
+        }
+    });
+
+    async function loadTrendingNews() {
+        const list = document.getElementById('news-list');
+        document.getElementById('sidebar-title').textContent = 'GLOBAL TRENDING';
+        list.innerHTML = '<div class="empty-state" style="padding:30px;"><span style="animation: pulse-loading 1.5s ease-in-out infinite; display:inline-block;">LOADING GLOBAL HOTSPOTS...</span></div>';
+
+        try {
+            let results = [];
+            const sourceParam = useRealAPI ? 'real' : 'llm';
+            const lang = currentLang === 'zh' ? 'zh' : 'en';
+
+            // All trending goes through server API
+            const response = await fetch(`/api/news/trending?lang=${lang}&source=${sourceParam}`, { headers: getApiHeaders() });
+            if (!response.ok) throw new Error(`News API returned ${response.status}`);
+            const data = await response.json();
+
+            if (data.error) {
+                console.warn('News API error:', data.error);
+                throw new Error(data.error);
+            }
+
+            results = data.results || [];
+            if (results.length === 0) {
+                throw new Error('No news returned from API');
+            }
+
+            newsData = buildNewsData(results);
+
+            // Update globe markers
+            app.updateGlobeData();
+
+            // Show trending in sidebar
+            lastSearchQuery = '';
+            list.innerHTML = newsData.map((news, i) => renderNewsCardHTML(news, i)).join('');
+            lastResultsHTML = list.innerHTML;
+
+        } catch (err) {
+            console.error('Trending news error:', err);
+            list.innerHTML = '<div class="empty-state">COULD NOT LOAD TRENDING NEWS</div>';
+        }
+    }
+
+    </script>
+
+</body>
+</html>
