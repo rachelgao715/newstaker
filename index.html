@@ -1254,10 +1254,42 @@
             <div style="font-family:var(--font-mono); font-size:9px; color:#b0a89e; margin-top:20px; letter-spacing:0.5px; line-height:1.6;">
                 Your key is stored in sessionStorage only — never sent to any<br>third party. It is used solely to authenticate with the LLM endpoint.
             </div>
+
+            <div style="border:1.5px dashed var(--brand-orange); padding:16px 20px; margin-top:20px; background:rgba(184,92,56,0.04); text-align:left;">
+                <div style="font-family:var(--font-display); font-size:11px; color:var(--brand-orange); text-transform:uppercase; margin-bottom:8px;">🎉 Trial Token Available</div>
+                <div style="font-family:var(--font-mono); font-size:9px; color:#6b6580; line-height:1.5; margin-bottom:10px;">
+                    Don't have a key? Use the token below for a quick demo experience:
+                </div>
+                <div id="trial-token-box" style="position:relative; font-family:var(--font-mono); font-size:9.5px; color:var(--text-dark); background:var(--bg-paper); border:1px solid var(--grid-line); padding:8px 36px 8px 10px; word-break:break-all; line-height:1.6; cursor:pointer;" onclick="copyTrialToken()" title="Click to copy">
+                    sk-2bd8fe592d5771a251a1635d5543c9629b25c1f52682dd74d6a425b89b67b6e5
+                    <span style="position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:13px;">📋</span>
+                </div>
+                <div id="trial-copy-status" style="font-family:var(--font-mono); font-size:9px; color:var(--brand-orange); margin-top:6px; min-height:14px;"></div>
+                <div style="font-family:var(--font-mono); font-size:8px; color:#b0a89e; margin-top:6px; letter-spacing:0.5px; line-height:1.5; text-transform:uppercase;">
+                    ⚠ For demo / trial use only. Please do not abuse.
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
+    // ── Trial Token Copy ──
+    function copyTrialToken() {
+        const token = 'sk-2bd8fe592d5771a251a1635d5543c9629b25c1f52682dd74d6a425b89b67b6e5';
+        navigator.clipboard.writeText(token).then(() => {
+            const status = document.getElementById('trial-copy-status');
+            status.textContent = '✓ Copied to clipboard! Paste it above.';
+            setTimeout(() => { status.textContent = ''; }, 3000);
+        }).catch(() => {
+            // Fallback: select the text
+            const box = document.getElementById('trial-token-box');
+            const range = document.createRange();
+            range.selectNodeContents(box);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+        });
+    }
+
     // ── API Key Management ──
     let _userApiKey = sessionStorage.getItem('newstaker_api_key') || '';
 
